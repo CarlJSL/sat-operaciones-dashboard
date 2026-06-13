@@ -35,7 +35,7 @@ export function ForgotPassForm({
         <CardHeader>
           <div className="flex flex-col items-center justify-center gap-1 text-center mb-2 w-full">
             <CardTitle className="text-center text-2xl font-bold">
-              RFM Análisis
+              SAT
             </CardTitle>
             <CardDescription className="text-center">
               Recuperación de contraseña

@@ -44,7 +44,7 @@ export default function LoginPage() {
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
           <img src={logo} alt="Logo" className="h-6 w-6 object-contain" />
-          <span className="text-sm font-medium">Kocospay</span>
+          <span className="text-sm font-medium">Sat</span>
         </div>
 
         <div className="flex flex-1 items-center justify-center">

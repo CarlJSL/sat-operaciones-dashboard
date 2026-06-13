@@ -4,7 +4,7 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig(({ command }) => ({
-  base: command === "build" ? "/kocospay/" : "/",
+  base: command === "build" ? "/Sat/" : "/",
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,

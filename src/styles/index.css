@@ -83,6 +83,8 @@
   --color-brand-destructive-foreground: #fae8e8;
 
   --color-brand-neutro: #6b7280;
+  --color-platform-blue: #1a4a84;
+  --color-platform-blue-foreground: #ffffff;
   /*Colors Table*/
   --color-table-header: #f3f4f6;
 }

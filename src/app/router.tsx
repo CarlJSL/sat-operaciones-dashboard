@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
 import { DashboardLayout } from '@/shared/components/layout/DashboardLayout';
 
+const PageInicial = lazy(() => import('../features/auth/pages/PageInicial'));
 const LoginPage = lazy(() => import('../features/auth/pages/LoginPage'));
 const UsuarioListaPage = lazy(() => import('../features/usuario/pages/usuario-lista'));
 
@@ -34,6 +35,7 @@ export function AppRouter() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Rutas públicas */}
+          <Route path="/inicio" element={<PageInicial />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/verify-code" element={<VerifyCodePage />} />
