@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Bell, Check, FileText, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -59,8 +60,8 @@ export default function PageInicial() {
               </div>
             </button>
 
-            <button
-              type="button"
+            <Link
+              to="/notificame/registro"
               className="group relative flex min-h-36 flex-col items-center justify-center gap-3 rounded-xl border bg-background p-4 text-center shadow-sm transition hover:border-platform-blue/40 hover:bg-accent focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none sm:min-h-40 sm:p-5 md:min-h-48 md:gap-4 md:p-6"
             >
               <Badge variant="destructive" className="absolute top-3 right-3 sm:top-4 sm:right-4">
@@ -84,7 +85,7 @@ export default function PageInicial() {
                   obligaciones con el SAT a través de Whatsapp y Correo electrónico.
                 </p>
               </div>
-            </button>
+            </Link>
           </div>
         </CardContent>
 
