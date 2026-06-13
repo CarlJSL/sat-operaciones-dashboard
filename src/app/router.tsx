@@ -13,6 +13,12 @@ const CatalogoSubItemListaPage = lazy(() => import('../features/catalogo/pages/c
 const RolListaPage = lazy(() => import('../features/rol/pages/rol-lista'));
 
 /**
+ * Consulta en Línea
+ */
+const ConsultaEnLineaOptionsPage = lazy(() => import('../features/consulta-en-linea/pages/ConsultaEnLineaOptionsPage'));
+const ConsultaPapeletaPage = lazy(() => import('../features/consulta-en-linea/pages/ConsultaPapeletaPage'));
+
+/**
  * Vistas Core
  */
 
@@ -42,6 +48,9 @@ export function AppRouter() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
+          {/* Consulta en Línea */}
+          <Route path="/consulta-en-linea" element={<ConsultaEnLineaOptionsPage />} />
+          <Route path="/consulta-en-linea/papeletas" element={<ConsultaPapeletaPage />} />
 
           {/*
            * Rutas protegidas — patrón de nested routes (react-router v7):
