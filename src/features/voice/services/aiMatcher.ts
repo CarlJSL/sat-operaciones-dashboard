@@ -46,32 +46,75 @@ CLICK:   {"action":"click","target":"pagar","confidence":0.95}
 GLOBAL:  {"action":"global","command":"back","confidence":0.95}
 NO ENTIENDO: {"action":"unknown","reason":"motivo","confidence":0.0}
 
-— EJEMPLOS (aprendé de estos) —
-
-"quisiera ver si tengo multas" → navigate a /consulta-en-linea/papeletas
-"¿tengo alguna papeleta?" → navigate a /consulta-en-linea/papeletas
-"como hago para pagar" → navigate a /consulta-en-linea/papeletas
-"búscame la papeleta 155801" → search con query "155801"
-"consultar placa A1G359" → search con query "A1G359"
-"ver papeleta del DNI 12345678" → search con query "12345678"
-"pagar la multa" → click target "pagar"
-"hacer un reclamo" → click target "reclamo"
-"imprimime la constancia" → click target "imprimir"
-"descargar el expediente" → click target "descargar"
-"quiero hablar con alguien" → click target "whatsapp"
-"mostrame la foto de la infracción" → click target "show-photo"
-"cerrame esa imagen" → click target "close-photo"
-"volver atrás" → global command "back"
-"llévame al inicio" → global command "home"
-"quiero salir de mi cuenta" → global command "logout"
-"no sé qué hacer, ayudame" → global command "help"
-"ya no quiero hablar" → global command "stop"
-"me quiero registrar para alertas" → navigate a /notificame/registro
-"donde veo los usuarios" → navigate a /usuarios
-"quiero ver el catálogo" → navigate a /catalogo
-"chapa A1G359" → search con query "A1G359"
-"tengo una multa" → navigate a /consulta-en-linea/papeletas
-"debo algo al SAT" → navigate a /consulta-en-linea/papeletas
+— EJEMPLOS DE ENTRENAMIENTO —
+"quisiera ver si tengo multas" → {"action":"navigate","route":"/consulta-en-linea/papeletas","confidence":0.95}
+"tengo alguna papeleta" → {"action":"navigate","route":"/consulta-en-linea/papeletas","confidence":0.95}
+"ver mis papeletas" → {"action":"navigate","route":"/consulta-en-linea/papeletas","confidence":0.95}
+"a ver las multas" → {"action":"navigate","route":"/consulta-en-linea/papeletas","confidence":0.95}
+"mis partes" → {"action":"navigate","route":"/consulta-en-linea/papeletas","confidence":0.90}
+"tengo una multa" → {"action":"navigate","route":"/consulta-en-linea/papeletas","confidence":0.95}
+"debo algo al SAT" → {"action":"navigate","route":"/consulta-en-linea/papeletas","confidence":0.95}
+"consulta en línea" → {"action":"navigate","route":"/consulta-en-linea","confidence":0.95}
+"ir al inicio" → {"action":"navigate","route":"/inicio","confidence":0.95}
+"pantalla principal" → {"action":"navigate","route":"/inicio","confidence":0.95}
+"notifícame" → {"action":"navigate","route":"/notificame/registro","confidence":0.95}
+"registrarme para alertas" → {"action":"navigate","route":"/notificame/registro","confidence":0.95}
+"búscame la papeleta 155801" → {"action":"search","query":"155801","confidence":0.95}
+"consultar placa A1G359" → {"action":"search","query":"A1G359","confidence":0.95}
+"ver papeleta del DNI 12345678" → {"action":"search","query":"12345678","confidence":0.95}
+"buscar CP00155801" → {"action":"search","query":"CP00155801","confidence":0.95}
+"chapa A1G359" → {"action":"search","query":"A1G359","confidence":0.95}
+"como hago para pagar" → {"action":"click","target":"pagar","confidence":0.95}
+"como puedo pagar la multa" → {"action":"click","target":"pagar","confidence":0.95}
+"quisiera pagar mi papeleta" → {"action":"click","target":"pagar","confidence":0.95}
+"pagar ahora" → {"action":"click","target":"pagar","confidence":0.95}
+"pagar la multa" → {"action":"click","target":"pagar","confidence":0.95}
+"cancelar la deuda" → {"action":"click","target":"pagar","confidence":0.95}
+"abonar el monto" → {"action":"click","target":"pagar","confidence":0.95}
+"pagar con descuento" → {"action":"click","target":"pagar","confidence":0.95}
+"realizar el pago" → {"action":"click","target":"pagar","confidence":0.95}
+"disculpa como podría pagar" → {"action":"click","target":"pagar","confidence":0.90}
+"como hago para reclamar" → {"action":"click","target":"reclamo","confidence":0.95}
+"necesito hacer un descargo" → {"action":"click","target":"reclamo","confidence":0.95}
+"presentar reclamo" → {"action":"click","target":"reclamo","confidence":0.95}
+"hacer un reclamo" → {"action":"click","target":"reclamo","confidence":0.95}
+"quiero apelar la multa" → {"action":"click","target":"reclamo","confidence":0.95}
+"me quiero quejar" → {"action":"click","target":"reclamo","confidence":0.90}
+"no estoy de acuerdo" → {"action":"click","target":"reclamo","confidence":0.85}
+"como puedo imprimir eso" → {"action":"click","target":"imprimir","confidence":0.95}
+"imprimir constancia" → {"action":"click","target":"imprimir","confidence":0.95}
+"imprimime la constancia" → {"action":"click","target":"imprimir","confidence":0.95}
+"sacar copia" → {"action":"click","target":"imprimir","confidence":0.90}
+"descargar el expediente" → {"action":"click","target":"descargar","confidence":0.95}
+"bajar el documento" → {"action":"click","target":"descargar","confidence":0.90}
+"descargame el archivo" → {"action":"click","target":"descargar","confidence":0.95}
+"quiero hablar con alguien" → {"action":"click","target":"whatsapp","confidence":0.95}
+"contactar un asesor" → {"action":"click","target":"whatsapp","confidence":0.95}
+"comunicarme con el SAT" → {"action":"click","target":"whatsapp","confidence":0.95}
+"necesito ayuda de una persona" → {"action":"click","target":"whatsapp","confidence":0.90}
+"hablar con un humano" → {"action":"click","target":"whatsapp","confidence":0.90}
+"chat de whatsapp" → {"action":"click","target":"whatsapp","confidence":0.95}
+"mostrame la foto de la infracción" → {"action":"click","target":"show-photo","confidence":0.95}
+"ver evidencia" → {"action":"click","target":"show-photo","confidence":0.95}
+"quiero ver la foto" → {"action":"click","target":"show-photo","confidence":0.95}
+"cerrame esa imagen" → {"action":"click","target":"close-photo","confidence":0.95}
+"cerrar foto" → {"action":"click","target":"close-photo","confidence":0.95}
+"cierra eso porfa" → {"action":"click","target":"close-photo","confidence":0.95}
+"cierra esa ventana" → {"action":"click","target":"close-photo","confidence":0.95}
+"saca eso" → {"action":"click","target":"close-photo","confidence":0.90}
+"cierra la foto" → {"action":"click","target":"close-photo","confidence":0.95}
+"quitame eso de la pantalla" → {"action":"click","target":"close-photo","confidence":0.90}
+"volver atrás" → {"action":"global","command":"back","confidence":0.95}
+"llévame al inicio" → {"action":"global","command":"home","confidence":0.95}
+"quiero salir de mi cuenta" → {"action":"global","command":"logout","confidence":0.95}
+"cerrar sesión" → {"action":"global","command":"logout","confidence":0.95}
+"no sé qué hacer ayudame" → {"action":"global","command":"help","confidence":0.95}
+"necesito ayuda" → {"action":"global","command":"help","confidence":0.95}
+"ya no quiero hablar" → {"action":"global","command":"stop","confidence":0.95}
+"cállate" → {"action":"global","command":"stop","confidence":0.90}
+"no" → {"action":"unknown","reason":"negativa","confidence":0.0}
+"nada" → {"action":"unknown","reason":"sin contenido","confidence":0.0}
+"mmm" → {"action":"unknown","reason":"sonido","confidence":0.0}
 
 — REGLAS —
 1. Respondé solo el JSON. Nada de markdown ni explicaciones.

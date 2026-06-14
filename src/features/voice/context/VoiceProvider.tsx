@@ -52,12 +52,12 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     const registry = registryRef.current;
     const globalScope = '__global__';
 
-    const backPatterns = ['volver', 'atras', 'retroceder', 'regresar'].map(normalize);
-    const homePatterns = ['inicio', 'principal', 'home', 'plataforma'].map(normalize);
-    const logoutPatterns = ['salir', 'cerrar sesion', 'logout'].map(normalize);
-    const helpPatterns = ['ayuda', 'asistencia', 'que puedo decir', 'comandos'].map(normalize);
-    const closeHintPatterns = ['cerrar', 'ocultar'].map(normalize);
-    const stopPatterns = ['detener', 'parar', 'stop'].map(normalize);
+    const backPatterns = ['volver', 'atras', 'retroceder', 'regresar', 'quiero volver', 'regresame', 'devolverme', 'para atras', 'pagina anterior'].map(normalize);
+    const homePatterns = ['inicio', 'principal', 'home', 'plataforma', 'pagina principal', 'pantalla principal', 'menu principal', 'comienzo', 'llevame al inicio', 'ir al principio'].map(normalize);
+    const logoutPatterns = ['salir', 'cerrar sesion', 'logout', 'desconectarme', 'quiero salir', 'cerrar mi cuenta', 'terminar sesion'].map(normalize);
+    const helpPatterns = ['ayuda', 'asistencia', 'que puedo decir', 'comandos', 'no se que hacer', 'no entiendo', 'explicame', 'como funciona', 'orientame'].map(normalize);
+    const closeHintPatterns = ['cerrar', 'ocultar', 'cierra', 'cerra'].map(normalize);
+    const stopPatterns = ['detener', 'parar', 'stop', 'basta', 'callate', 'silencio', 'no quiero hablar', 'apaga', 'termina'].map(normalize);
 
     const backAction = () => navigate(-1);
     const homeAction = () => navigate('/inicio');
