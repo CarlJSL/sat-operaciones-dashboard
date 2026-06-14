@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Bell, Check, FileText, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -11,9 +12,34 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
+import { useVoiceContext } from "@/features/voice/context/voiceContext";
 
 export default function PageInicial() {
   const navigate = useNavigate();
+  const { registerCommand } = useVoiceContext();
+
+  // Register platform navigation voice commands
+  useEffect(() => {
+    const cleanups: (() => void)[] = [];
+
+    // "consulta en línea" / "consultar" / "ver papeletas" → navigate to consultation
+    cleanups.push(registerCommand({
+      patterns: ['consulta en linea', 'consultar', 'ver papeletas'],
+      action: () => navigate('/consulta-en-linea'),
+      scope: 'page-inicial',
+    }));
+
+    // "notifícame" / "registrarme" / "alertas" → navigate to Notifícame registration
+    cleanups.push(registerCommand({
+      patterns: ['notificame', 'registrarme', 'alertas'],
+      action: () => navigate('/notificame/registro'),
+      scope: 'page-inicial',
+    }));
+
+    return () => {
+      cleanups.forEach(cleanup => cleanup());
+    };
+  }, [navigate, registerCommand]);
 
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-platform-blue p-3 text-platform-blue-foreground sm:p-6">

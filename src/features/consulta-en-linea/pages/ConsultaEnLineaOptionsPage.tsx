@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ArrowLeft, MessageCircle, Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,9 +12,43 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
+import { useVoiceContext } from "@/features/voice/context/voiceContext";
+
+const WHATSAPP_URL = 'https://wa.me/51999431111';
 
 export default function ConsultaEnLineaOptionsPage() {
   const navigate = useNavigate();
+  const { registerCommand } = useVoiceContext();
+
+  // Register options page voice commands
+  useEffect(() => {
+    const cleanups: (() => void)[] = [];
+
+    // "papeletas" / "consultar por DNI" / "ver mis papeletas" → navigate to papeletas
+    cleanups.push(registerCommand({
+      patterns: ['papeletas', 'consultar por dni', 'ver mis papeletas'],
+      action: () => navigate('/consulta-en-linea/papeletas'),
+      scope: 'consulta-opciones',
+    }));
+
+    // "chatbot" / "whatsapp" / "hablar con asesor" → open WhatsApp link
+    cleanups.push(registerCommand({
+      patterns: ['chatbot', 'whatsapp', 'hablar con asesor'],
+      action: () => window.open(WHATSAPP_URL, '_blank', 'noopener,noreferrer'),
+      scope: 'consulta-opciones',
+    }));
+
+    // "volver" / "inicio" → navigate to home (already a global command, but this is page-specific)
+    cleanups.push(registerCommand({
+      patterns: ['volver al inicio'],
+      action: () => navigate('/inicio'),
+      scope: 'consulta-opciones',
+    }));
+
+    return () => {
+      cleanups.forEach(cleanup => cleanup());
+    };
+  }, [navigate, registerCommand]);
 
   return (
     <main className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-platform-blue p-3 text-platform-blue-foreground sm:p-6">

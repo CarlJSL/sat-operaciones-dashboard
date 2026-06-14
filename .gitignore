@@ -33,3 +33,9 @@ dist-ssr
 
 .agents
 skills-lock.json
+
+# SDD / OpenSpec artifacts
+openspec/
+
+# Skill registry (generado)
+.atl/

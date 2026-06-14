@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Search, Printer, ExternalLink, CheckCircle2, Clock, AlertTriangle, ArrowRight, Loader2, ArrowLeft, Eye, X } from "lucide-react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Search, CheckCircle2, Clock, AlertTriangle, ArrowRight, Loader2, ArrowLeft, Eye, X } from "lucide-react";
+import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
@@ -14,18 +14,31 @@ import { cn } from "@/core/lib/utils";
 import { toast } from "sonner";
 import { ReclamoFlow } from "../components/reclamo-flow";
 import { PagoModal } from "../components/pago-modal";
+import { useVoiceContext } from "@/features/voice/context/voiceContext";
+import { useSpeechSynthesis } from "@/features/voice/hooks/useSpeechSynthesis";
+import { normalize } from "@/features/voice/services/commandMatcher";
 import infractionImage from "@/assets/images/image.webp";
 
 export default function ConsultaPapeletaPage() {
   const { numeroDePapeleta } = useParams();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const { registerCommand, showGuidance } = useVoiceContext();
+  const { speak } = useSpeechSynthesis();
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? "");
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [showPhoto, setShowPhoto] = useState(false);
   
   const [reclamoOpen, setReclamoOpen] = useState(false);
   const [pagoOpen, setPagoOpen] = useState(false);
+
+  const payButtonRef = useRef<HTMLButtonElement>(null);
+  const reclamoButtonRef = useRef<HTMLButtonElement>(null);
+  const imprimirButtonRef = useRef<HTMLButtonElement>(null);
+  const descargarButtonRef = useRef<HTMLButtonElement>(null);
+  const whatsappLinkRef = useRef<HTMLAnchorElement>(null);
+  const autoSearchRef = useRef<string | null>(null);
 
   // Mock initial data
   const [papeletaActual, setPapeletaActual] = useState({
@@ -54,7 +67,7 @@ export default function ConsultaPapeletaPage() {
     { id: 6, title: "Medidas Cautelares", desc: "Embargo o captura de vehículo", status: "upcoming", deadline: "7 días hábiles" },
   ];
 
-  const performSearch = async (query: string) => {
+  const performSearch = useCallback(async (query: string) => {
     if (!query.trim()) return;
 
     setIsLoading(true);
@@ -83,17 +96,19 @@ export default function ConsultaPapeletaPage() {
       setHasSearched(false);
     }
     setIsLoading(false);
-  };
+  }, []);
 
+  // Sync URL route param to state
   useEffect(() => {
     if (numeroDePapeleta) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: sync URL param to local state
       setSearchQuery(numeroDePapeleta);
       performSearch(numeroDePapeleta);
     } else {
       setHasSearched(false);
       setSearchQuery("");
     }
-  }, [numeroDePapeleta]);
+  }, [numeroDePapeleta, performSearch]);
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -102,9 +117,172 @@ export default function ConsultaPapeletaPage() {
     }
   };
 
-  const resetSearch = () => {
+  const resetSearch = useCallback(() => {
+    setHasSearched(false);
+    setSearchQuery("");
+    setShowPhoto(false);
+    setReclamoOpen(false);
     navigate("/consulta-en-linea/papeletas");
-  };
+  }, [navigate]);
+
+  // Auto-search from URL query param
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q && q !== autoSearchRef.current) {
+      autoSearchRef.current = q;
+      setSearchQuery(q);
+      performSearch(q);
+    }
+  }, [searchParams, performSearch]);
+
+  // Voice commands
+  useEffect(() => {
+    const cleanups: (() => void)[] = [];
+
+    if (!hasSearched) {
+      // Search state commands
+      cleanups.push(registerCommand({
+        patterns: ['buscar', 'buscar papeleta', 'consultar'],
+        action: (transcript) => {
+          const normalized = normalize(transcript ?? '');
+          const query = normalized
+            .replace(/^(buscar\s*(papeleta)?|consultar)\s*/, '')
+            .trim();
+          if (query) {
+            setSearchQuery(query);
+            performSearch(query);
+            speak(`Buscando DNI ${query}`);
+          } else {
+            speak('Decime tu número de DNI');
+            showGuidance('Para buscar por DNI, decí tu número.\nPor ejemplo: "buscar DNI 12345678".');
+          }
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['buscar dni', 'consultar dni'],
+        action: (transcript) => {
+          const normalized = normalize(transcript ?? '');
+          const dni = normalized
+            .replace(/^(buscar|consultar)\s*dni\s*/, '')
+            .trim();
+          if (dni) {
+            setSearchQuery(dni);
+            performSearch(dni);
+            speak(`Consultando DNI ${dni}`);
+          }
+        },
+        scope: 'consulta-papeleta',
+      }));
+    } else {
+      // Results state commands
+      cleanups.push(registerCommand({
+        patterns: ['pagar', 'pagar ahora', 'pagar descuento'],
+        action: () => {
+          speak('Abriendo opciones de pago');
+          payButtonRef.current?.click();
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['presentar reclamo', 'hacer reclamo', 'apelar', 'reclamar infraccion'],
+        action: () => {
+          speak('Abriendo formulario de reclamo');
+          setReclamoOpen(true);
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['imprimir', 'imprimir constancia'],
+        action: () => {
+          speak('Preparando constancia para imprimir');
+          imprimirButtonRef.current?.click();
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['descargar', 'descargar expediente'],
+        action: () => {
+          speak('Descargando expediente');
+          descargarButtonRef.current?.click();
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['whatsapp', 'asesor', 'chatbot'],
+        action: () => {
+          speak('Conectando con asesor por WhatsApp');
+          whatsappLinkRef.current?.click();
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['buscar otra', 'nueva busqueda', 'otra papeleta'],
+        action: () => {
+          speak('Volviendo a la búsqueda');
+          resetSearch();
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['ver detalle', 'ver infraccion', 'ver foto', 'mostrar foto', 'evidencia'],
+        action: () => {
+          speak('Mostrando evidencia visual');
+          setShowPhoto(true);
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['cerrar foto', 'ocultar foto', 'cerrar evidencia'],
+        action: () => {
+          speak('Cerrando evidencia');
+          setShowPhoto(false);
+        },
+        scope: 'consulta-papeleta',
+      }));
+    }
+
+    return () => {
+      cleanups.forEach(cleanup => cleanup());
+    };
+  }, [hasSearched, registerCommand, speak, performSearch, resetSearch, showGuidance]);
+
+  // AI click listener
+  useEffect(() => {
+    const RESULTS_ONLY = new Set(['pagar', 'reclamo', 'imprimir', 'descargar', 'show-photo', 'close-photo']);
+
+    const handler = (e: Event) => {
+      const { target } = (e as CustomEvent<{ target: string }>).detail;
+
+      // Guide user: results-only actions need a search first
+      if (!hasSearched && RESULTS_ONLY.has(target)) {
+        speak('Primero ingresa el número de tu papeleta, placa o DNI');
+        showGuidance('Para continuar, primero buscá tu papeleta.\nDecí "buscar" seguido de tu número de placa o DNI.');
+        return;
+      }
+
+      switch (target) {
+        case 'pagar': payButtonRef.current?.click(); break;
+        case 'reclamo': setReclamoOpen(true); break;
+        case 'imprimir': imprimirButtonRef.current?.click(); break;
+        case 'descargar': descargarButtonRef.current?.click(); break;
+        case 'whatsapp': whatsappLinkRef.current?.click(); break;
+        case 'buscar-otra': resetSearch(); break;
+        case 'show-photo': setShowPhoto(true); break;
+        case 'close-photo': setShowPhoto(false); break;
+      }
+    };
+    window.addEventListener('voice:ai-click', handler);
+    return () => window.removeEventListener('voice:ai-click', handler);
+  }, [hasSearched, resetSearch, speak]);
 
   return (
     <div className="min-h-screen bg-zinc-50/50">
@@ -292,12 +470,14 @@ export default function ConsultaPapeletaPage() {
                     </div>
                     <div className="flex flex-col gap-3 shrink-0 sm:flex-row lg:flex-col">
                       <Button
+                        ref={payButtonRef}
                         onClick={() => setPagoOpen(true)}
                         className="bg-platform-blue hover:bg-platform-blue/90 shadow-xl shadow-blue-900/10 px-10 py-7 h-auto text-lg font-black transition-all hover:-translate-y-1"
                       >
                         PAGAR AHORA <ArrowRight className="ml-3 size-6" />
                       </Button>
                       <Button
+                        ref={reclamoButtonRef}
                         variant="outline"
                         onClick={() => setReclamoOpen(true)}
                         className="border-platform-blue text-platform-blue font-bold hover:bg-blue-50 py-7 h-auto"

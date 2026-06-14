@@ -2,6 +2,11 @@ import { lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/features/auth/ProtectedRoute';
 import { DashboardLayout } from '@/shared/components/layout/DashboardLayout';
+import { VoiceProvider } from '@/features/voice/context/VoiceProvider';
+import { VoiceFAB } from '@/features/voice/components/VoiceFAB';
+import { VoicePrivacyBanner } from '@/features/voice/components/VoicePrivacyBanner';
+import { VoiceCommandHint } from '@/features/voice/components/VoiceCommandHint';
+import { VoiceDynamicMenuCommands } from '@/features/voice/components/VoiceDynamicMenuCommands';
 
 const PageInicial = lazy(() => import('../features/auth/pages/PageInicial'));
 const NotificameRegistroPage = lazy(() => import('../features/auth/pages/NotificameRegistroPage'));
@@ -40,8 +45,9 @@ const PageLoader = () => (
 export function AppRouter() {
   return (
     <HashRouter>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
+      <VoiceProvider>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
           {/* Rutas públicas */}
           <Route path="/inicio" element={<PageInicial />} />
           <Route path="/notificame/registro" element={<NotificameRegistroPage />} />
@@ -76,6 +82,12 @@ export function AppRouter() {
           </Route>
         </Routes>
       </Suspense>
+      {/* Voice UI — inside VoiceProvider but outside Suspense/Routes so it overlays all pages */}
+      <VoiceFAB />
+      <VoicePrivacyBanner />
+      <VoiceCommandHint />
+      <VoiceDynamicMenuCommands />
+    </VoiceProvider>
     </HashRouter>
   );
 }
