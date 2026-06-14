@@ -25,11 +25,14 @@ import {
 } from "@/components/ui/input-otp";
 import { verifyCodeSchema, type VerifyCodeFormulario } from "@/domain/auth";
 import { authService } from "@/features/auth/api/auth.service";
+import { wspService } from "@/features/auth/api/wsp.service";
 import { useSuccessStore } from "@/shared/store/successStore";
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
 
 type VerifyCodeState = {
   correo?: string;
+  telefono?: string;
+  codigo?: string;
   flow?: "notificame";
 };
 
@@ -38,7 +41,10 @@ export default function VerifyCodePage() {
   const navigate = useNavigate();
   const state = (location.state ?? {}) as VerifyCodeState;
   const correo = state.correo ?? "correo@demo.pe";
+  const telefono = state.telefono ?? "+51999999999";
+  const codigo = state.codigo ?? "";
   const isNotificameFlow = state.flow === "notificame";
+  const verificationTarget = isNotificameFlow ? telefono : correo;
 
   const methods = useForm<VerifyCodeFormulario>({
     resolver: zodResolver(verifyCodeSchema),
@@ -68,21 +74,41 @@ export default function VerifyCodePage() {
   });
 
   const { mutate: resend, isPending: isResending } = useMutation({
-    mutationFn: () => authService.forgotPasword(correo),
+    mutationFn: () => {
+      if (isNotificameFlow) {
+        return wspService.sendMessage({
+          telefono,
+          mensaje: `Tu código de verificación para Notifícame SAT es: ${codigo}`,
+        });
+      }
+
+      return authService.forgotPasword(correo);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["auth"] });
 
       useSuccessStore.getState().show({
         title: "Código reenviado",
-        description: "Se ha enviado un nuevo código",
+        description: isNotificameFlow
+          ? "Se ha enviado un nuevo código al teléfono registrado."
+          : "Se ha enviado un nuevo código",
       });
     },
   });
 
   function handleSubmit(data: VerifyCodeFormulario) {
     if (isNotificameFlow) {
+      if (codigo && data.code !== codigo) {
+        methods.setError("code", {
+          type: "validate",
+          message: "El código ingresado no coincide.",
+        });
+        methods.setValue("code", "");
+        return;
+      }
+
       navigate("/notificame/confirmacion", {
-        state: { correo, codigo: data.code },
+        state: { correo, telefono, codigo: data.code },
       });
       return;
     }
@@ -91,14 +117,6 @@ export default function VerifyCodePage() {
   }
 
   function handleResend() {
-    if (isNotificameFlow) {
-      useSuccessStore.getState().show({
-        title: "Código reenviado",
-        description: "Se ha enviado un nuevo código al correo.",
-      });
-      return;
-    }
-
     resend();
   }
 
@@ -123,18 +141,18 @@ export default function VerifyCodePage() {
           </div>
           <div className="flex flex-col gap-2">
             <CardTitle className="text-xl font-semibold text-platform-blue sm:text-2xl">
-              Verifica tu correo
+              {isNotificameFlow ? "Verifica tu teléfono" : "Verifica tu correo"}
             </CardTitle>
             <CardDescription>
               Ingresa el código de 6 dígitos enviado a{" "}
               <Badge variant="secondary" className="align-middle">
-                {correo}
+                {verificationTarget}
               </Badge>
             </CardDescription>
           </div>
           {isNotificameFlow && (
             <CardDescription>
-              Este paso valida tu correo antes de activar las notificaciones.
+              Este paso valida tu teléfono antes de activar las notificaciones.
             </CardDescription>
           )}
         </CardHeader>

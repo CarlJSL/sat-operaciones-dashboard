@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,9 +31,46 @@ import {
 } from "@/components/ui/select";
 import loginImage from "@/assets/images/login-img.jpg";
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
+import { wspService } from "@/features/auth/api/wsp.service";
+
+function createVerificationCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function formatPeruPhone(telefono: string) {
+  const digits = telefono.replace(/\D/g, "");
+  const withoutCountryCode = digits.startsWith("51") ? digits.slice(2) : digits;
+
+  return `+51${withoutCountryCode}`;
+}
 
 export default function NotificameRegistroPage() {
   const navigate = useNavigate();
+  const { mutate, isPending } = useMutation({
+    mutationFn: wspService.sendMessage,
+  });
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const correo = String(formData.get("correo") || "correo@demo.pe");
+    const telefono = formatPeruPhone(String(formData.get("telefono") || ""));
+    const codigo = createVerificationCode();
+
+    mutate(
+      {
+        telefono,
+        mensaje: `Tu código de verificación para Notifícame SAT es: ${codigo}`,
+      },
+      {
+        onSuccess: () => {
+          navigate("/verify-code", {
+            state: { correo, telefono, codigo, flow: "notificame" },
+          });
+        },
+      }
+    );
+  }
 
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-platform-blue p-3 text-platform-blue-foreground sm:p-6">
@@ -63,20 +101,12 @@ export default function NotificameRegistroPage() {
         <CardContent className="px-4 sm:px-8">
           <form
             className="flex flex-col gap-5"
-            onSubmit={(event) => {
-              event.preventDefault();
-              const formData = new FormData(event.currentTarget);
-              const correo = String(formData.get("correo") || "correo@demo.pe");
-
-              navigate("/verify-code", {
-                state: { correo, flow: "notificame" },
-              });
-            }}
+            onSubmit={handleSubmit}
           >
             <FieldGroup className="gap-5">
               <Field>
-                <FieldLabel htmlFor="tipo-documento">Tipo documento</FieldLabel>
-                <Select>
+                <FieldLabel htmlFor="tipo-documento">Tipo documento *</FieldLabel>
+                <Select required>
                   <SelectTrigger id="tipo-documento" className="w-full">
                     <SelectValue placeholder="Selecciona un tipo de documento" />
                   </SelectTrigger>
@@ -91,31 +121,35 @@ export default function NotificameRegistroPage() {
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="documento">Documento</FieldLabel>
+                <FieldLabel htmlFor="documento">Documento *</FieldLabel>
                 <Input
                   id="documento"
                   inputMode="numeric"
                   placeholder="Ingresa tu número de documento"
+                  required
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="telefono">Teléfono</FieldLabel>
+                <FieldLabel htmlFor="telefono">Teléfono *</FieldLabel>
                 <Input
                   id="telefono"
+                  name="telefono"
                   type="tel"
                   inputMode="tel"
                   placeholder="Ingresa tu número de teléfono"
+                  required
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="correo">Correo electrónico</FieldLabel>
+                <FieldLabel htmlFor="correo">Correo electrónico *</FieldLabel>
                 <Input
                   id="correo"
                   name="correo"
                   type="email"
                   placeholder="correo@empresa.com"
+                  required
                 />
               </Field>
 
@@ -123,7 +157,7 @@ export default function NotificameRegistroPage() {
                 <Checkbox id="terminos" />
                 <FieldContent>
                   <FieldLabel htmlFor="terminos">
-                    Acepto términos y condiciones
+                    Acepto términos y condiciones *
                   </FieldLabel>
                   <FieldDescription>
                     Autorizo el envío de notificaciones por WhatsApp y correo
@@ -149,8 +183,10 @@ export default function NotificameRegistroPage() {
               type="submit"
               size="lg"
               className="w-full bg-platform-blue text-platform-blue-foreground hover:bg-platform-blue/90"
+              disabled={isPending}
             >
-              Registrar
+              {isPending && <Loader2 data-icon="inline-start" className="animate-spin" />}
+              {isPending ? "Enviando código..." : "Registrar"}
             </Button>
           </form>
         </CardContent>
