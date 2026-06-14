@@ -151,12 +151,13 @@ export function ReclamoFlow({
           step === 1 && "sm:max-w-md [&>button.absolute]:hidden",
           step === 2 && "sm:max-w-md",
         )}
+        onOpenAutoFocus={(e) => e.preventDefault()}
         onInteractOutside={step === 0 ? (e) => e.preventDefault() : undefined}
         onEscapeKeyDown={step === 0 ? (e) => e.preventDefault() : undefined}
       >
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 z-10 cursor-pointer rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden"
+          className="absolute top-4 right-4 z-10 cursor-pointer rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-0"
           aria-label="Cerrar"
         >
           <X className="size-4" />
