@@ -1,6 +1,7 @@
-import { MessageCircle, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, MessageCircle, Search } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,11 +13,13 @@ import {
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
 
 export default function ConsultaEnLineaOptionsPage() {
+  const navigate = useNavigate();
+
   return (
     <main className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-platform-blue p-3 text-platform-blue-foreground sm:p-6">
       <div className="pointer-events-none absolute inset-0 text-platform-blue-foreground/15 bg-[radial-gradient(circle_at_1px_1px,currentColor_1.25px,transparent_0)] bg-size-[26px_26px]" />
       
-      <div className="z-10 w-full max-w-4xl mb-4">
+      <div className="z-10 w-full max-w-4xl mb-4 flex items-center justify-between">
         <Breadcrumb>
           <BreadcrumbList className="text-white/80">
             <BreadcrumbItem>
@@ -30,6 +33,15 @@ export default function ConsultaEnLineaOptionsPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate("/inicio")}
+          className="text-white hover:bg-white/10 hover:text-white gap-2"
+        >
+          <ArrowLeft className="size-4" />
+          Volver
+        </Button>
       </div>
 
       <Card className="relative w-full max-w-4xl border-0 bg-card/95 py-5 text-card-foreground shadow-2xl sm:py-7 md:px-6 lg:px-8">
@@ -60,10 +72,10 @@ export default function ConsultaEnLineaOptionsPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <h2 className="text-lg font-semibold text-foreground">
-                  Consulta por DNI
+                  Consulta por número de papeleta
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Consulta tus papeletas pendientes y record de conductor
+                  Ingresa tu PIT para ver el estado y ruta de tu infracción
                 </p>
               </div>
             </Link>
