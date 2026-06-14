@@ -6,6 +6,18 @@ import { normalizeToCanonical, expandSynonyms } from './vocabulary';
 import type { CommandRegistry, CommandRegistryEntry } from '../types/voice.types';
 
 /**
+ * When multiple entries exist for the same pattern, prefer page-scoped
+ * commands over global ones so that page-level overrides (like closing
+ * modals) take priority over generic global commands (like navigate back).
+ */
+function selectBestEntry(entries: CommandRegistryEntry[]): CommandRegistryEntry {
+  if (entries.length === 1) return entries[0];
+  // Prefer non-global scopes
+  const pageEntry = entries.find(e => e.scope !== '__global__');
+  return pageEntry ?? entries[0];
+}
+
+/**
  * Normalize a raw transcript: lowercase, strip accents, trim whitespace.
  */
 export function normalize(text: string): string {
@@ -76,7 +88,7 @@ export function matchCommand(
   for (const alt of alternatives) {
     const entries = registry.get(alt);
     if (entries && entries.length > 0) {
-      return entries[0];
+      return selectBestEntry(entries);
     }
   }
 
@@ -85,7 +97,7 @@ export function matchCommand(
   if (!alternatives.includes(canonical)) {
     const entries = registry.get(canonical);
     if (entries && entries.length > 0) {
-      return entries[0];
+      return selectBestEntry(entries);
     }
   }
 
@@ -105,7 +117,7 @@ export function matchCommand(
       // The candidate "buscar cp155801" starts with pattern "buscar" + " "
       if (candidate === pattern || candidate.startsWith(pattern + ' ')) {
         prefixMatches.push({
-          entry: entries[0],
+          entry: selectBestEntry(entries),
           patternLength: pattern.length,
         });
       }
@@ -145,7 +157,7 @@ export function matchCommand(
       const dist = levenshtein(alt, pattern);
       if (dist > 0 && dist <= 2) {
         fuzzyMatches.push({
-          entry: entries[0],
+          entry: selectBestEntry(entries),
           distance: dist,
           patternLength: pattern.length,
         });

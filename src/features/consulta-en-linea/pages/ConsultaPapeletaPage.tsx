@@ -167,8 +167,16 @@ export default function ConsultaPapeletaPage() {
     setSearchQuery("");
     setShowPhoto(false);
     setReclamoOpen(false);
+    setPagoOpen(false);
     navigate("/consulta-en-linea/papeletas");
   }, [navigate]);
+
+  /** Close all open modals before opening a new one. */
+  const closeAllModals = useCallback(() => {
+    setShowPhoto(false);
+    setReclamoOpen(false);
+    setPagoOpen(false);
+  }, []);
 
   // Auto-search from URL query param
   useEffect(() => {
@@ -185,18 +193,37 @@ export default function ConsultaPapeletaPage() {
     const cleanups: (() => void)[] = [];
 
     if (!hasSearched) {
-      // Search state commands
+      // Search state — natural language patterns
       cleanups.push(registerCommand({
-        patterns: ['buscar', 'buscar papeleta', 'consultar'],
+        patterns: ['buscar', 'buscar papeleta', 'buscar placa', 'consultar', 'quiero buscar', 'buscame', 'consultame', 'checar', 'chequear', 'ver', 'revisar', 'averiguar'],
         action: (transcript) => {
           const normalized = normalize(transcript ?? '');
           const query = normalized
-            .replace(/^(buscar\s*(papeleta)?|consultar)\s*/, '')
+            .replace(/^(buscar\s*(papeleta|placa)?|consultar|quiero buscar|buscame|consultame|checar|chequear|ver|revisar|averiguar)\s*/, '')
             .trim();
           if (query) {
-            setSearchQuery(query);
-            performSearch(query);
-            speak(`Buscando DNI ${query}`);
+            setSearchQuery(query.toUpperCase());
+            performSearch(query.toUpperCase());
+            speak(`Buscando ${query.toUpperCase()}`);
+          } else {
+            speak('Decime el número de papeleta, placa o DNI que querés buscar');
+            showGuidance('Para buscar una papeleta, decí el número.\nPor ejemplo: "buscar CP155801" o "placa A1G359".');
+          }
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['buscar dni', 'consultar dni', 'buscar por documento', 'consultar documento', 'ver por dni', 'revisar con dni'],
+        action: (transcript) => {
+          const normalized = normalize(transcript ?? '');
+          const dni = normalized
+            .replace(/^(buscar\s*dni|consultar\s*dni|buscar\s*por\s*documento|consultar\s*documento|ver\s*por\s*dni|revisar\s*con\s*dni)\s*/, '')
+            .trim();
+          if (dni) {
+            setSearchQuery(dni.toUpperCase());
+            performSearch(dni.toUpperCase());
+            speak(`Consultando DNI ${dni}`);
           } else {
             speak('Decime tu número de DNI');
             showGuidance('Para buscar por DNI, decí tu número.\nPor ejemplo: "buscar DNI 12345678".');
@@ -204,36 +231,22 @@ export default function ConsultaPapeletaPage() {
         },
         scope: 'consulta-papeleta',
       }));
-
-      cleanups.push(registerCommand({
-        patterns: ['buscar dni', 'consultar dni'],
-        action: (transcript) => {
-          const normalized = normalize(transcript ?? '');
-          const dni = normalized
-            .replace(/^(buscar|consultar)\s*dni\s*/, '')
-            .trim();
-          if (dni) {
-            setSearchQuery(dni);
-            performSearch(dni);
-            speak(`Consultando DNI ${dni}`);
-          }
-        },
-        scope: 'consulta-papeleta',
-      }));
     } else {
-      // Results state commands
+      // Results state — natural language patterns
       cleanups.push(registerCommand({
-        patterns: ['pagar', 'pagar ahora', 'pagar descuento'],
+        patterns: ['pagar', 'pagar ahora', 'pagar la multa', 'pagar mi papeleta', 'quiero pagar', 'cancelar deuda', 'abonar', 'liquidar', 'ponerme al dia', 'pagar con descuento', 'pagame', 'como pago', 'se puede pagar', 'realizar el pago', 'cancelar la multa', 'pagar ya'],
         action: () => {
-          speak('Abriendo opciones de pago');
+          closeAllModals();
+          speak('Abriendo pasarela de pago');
           payButtonRef.current?.click();
         },
         scope: 'consulta-papeleta',
       }));
 
       cleanups.push(registerCommand({
-        patterns: ['presentar reclamo', 'hacer reclamo', 'apelar', 'reclamar infraccion'],
+        patterns: ['presentar reclamo', 'hacer reclamo', 'hacer un reclamo', 'apelar', 'reclamar', 'impugnar', 'descargo', 'quejarme', 'no estoy de acuerdo', 'quiero reclamar', 'como reclamo', 'hacer descargo', 'presentar descargo', 'apelar la multa'],
         action: () => {
+          closeAllModals();
           speak('Abriendo formulario de reclamo');
           setReclamoOpen(true);
         },
@@ -241,7 +254,7 @@ export default function ConsultaPapeletaPage() {
       }));
 
       cleanups.push(registerCommand({
-        patterns: ['imprimir', 'imprimir constancia'],
+        patterns: ['imprimir', 'imprimir constancia', 'sacar copia', 'imprimime', 'quiero imprimir', 'dame constancia', 'sacame copia', 'imprimir documento', 'imprimir papeleta'],
         action: () => {
           speak('Preparando constancia para imprimir');
           imprimirButtonRef.current?.click();
@@ -250,7 +263,7 @@ export default function ConsultaPapeletaPage() {
       }));
 
       cleanups.push(registerCommand({
-        patterns: ['descargar', 'descargar expediente'],
+        patterns: ['descargar', 'descargar expediente', 'bajar', 'descargame', 'bajar documento', 'quiero descargar', 'bajar archivo', 'obtener copia', 'descargar pdf'],
         action: () => {
           speak('Descargando expediente');
           descargarButtonRef.current?.click();
@@ -259,7 +272,7 @@ export default function ConsultaPapeletaPage() {
       }));
 
       cleanups.push(registerCommand({
-        patterns: ['whatsapp', 'asesor', 'chatbot'],
+        patterns: ['whatsapp', 'asesor', 'chatbot', 'chatear', 'hablar con alguien', 'contactar', 'escribir al sat', 'atencion', 'comunicarme', 'quiero hablar', 'necesito un asesor', 'ayuda humana'],
         action: () => {
           speak('Conectando con asesor por WhatsApp');
           whatsappLinkRef.current?.click();
@@ -268,7 +281,7 @@ export default function ConsultaPapeletaPage() {
       }));
 
       cleanups.push(registerCommand({
-        patterns: ['buscar otra', 'nueva busqueda', 'otra papeleta'],
+        patterns: ['buscar otra', 'nueva busqueda', 'otra papeleta', 'buscar otra papeleta', 'nueva consulta', 'siguiente', 'quiero buscar otra', 'consultar otra'],
         action: () => {
           speak('Volviendo a la búsqueda');
           resetSearch();
@@ -277,8 +290,9 @@ export default function ConsultaPapeletaPage() {
       }));
 
       cleanups.push(registerCommand({
-        patterns: ['ver detalle', 'ver infraccion', 'ver foto', 'mostrar foto', 'evidencia'],
+        patterns: ['ver detalle', 'ver infraccion', 'ver foto', 'mostrar foto', 'evidencia', 'mostrame', 'quiero ver la foto', 'a ver', 'ensename', 'mostrar imagen', 'ver la prueba'],
         action: () => {
+          closeAllModals();
           speak('Mostrando evidencia visual');
           setShowPhoto(true);
         },
@@ -286,10 +300,32 @@ export default function ConsultaPapeletaPage() {
       }));
 
       cleanups.push(registerCommand({
-        patterns: ['cerrar foto', 'ocultar foto', 'cerrar evidencia'],
+        patterns: ['cerrar foto', 'ocultar foto', 'cerrar evidencia', 'cierra eso', 'cerrame', 'quitame', 'saca eso', 'cerrar eso', 'cierra la foto', 'ocultar imagen', 'cerrar imagen', 'ya vi la foto', 'listo cerra'],
         action: () => {
           speak('Cerrando evidencia');
           setShowPhoto(false);
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      // Modal-aware: close any open modal before navigating back
+      cleanups.push(registerCommand({
+        patterns: ['volver', 'atras', 'retroceder', 'regresar', 'quiero volver', 'regresame', 'volver atras', 'devolverme', 'para atras', 'retrocede'],
+        action: () => {
+          if (showPhoto) { closeAllModals(); speak('Cerrando foto'); return; }
+          if (reclamoOpen) { closeAllModals(); speak('Cerrando reclamo'); return; }
+          if (pagoOpen) { closeAllModals(); speak('Cerrando pago'); return; }
+        },
+        scope: 'consulta-papeleta',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['cerrar', 'cierra', 'cierra eso', 'cerrame', 'cerrar ventana', 'cerrar esto', 'ocultar', 'quitame', 'saca eso', 'cerra', 'cierra la ventana', 'quita eso'],
+        action: () => {
+          if (showPhoto) { closeAllModals(); speak('Foto cerrada'); return; }
+          if (reclamoOpen) { closeAllModals(); speak('Reclamo cerrado'); return; }
+          if (pagoOpen) { closeAllModals(); speak('Pago cerrado'); return; }
+          speak('No hay nada que cerrar');
         },
         scope: 'consulta-papeleta',
       }));
@@ -298,7 +334,7 @@ export default function ConsultaPapeletaPage() {
     return () => {
       cleanups.forEach(cleanup => cleanup());
     };
-  }, [hasSearched, registerCommand, speak, performSearch, resetSearch, showGuidance]);
+  }, [hasSearched, registerCommand, speak, performSearch, resetSearch, showGuidance, showPhoto, reclamoOpen, pagoOpen, closeAllModals]);
 
   // AI click listener
   useEffect(() => {
@@ -315,19 +351,19 @@ export default function ConsultaPapeletaPage() {
       }
 
       switch (target) {
-        case 'pagar': payButtonRef.current?.click(); break;
-        case 'reclamo': setReclamoOpen(true); break;
+        case 'pagar': closeAllModals(); payButtonRef.current?.click(); break;
+        case 'reclamo': closeAllModals(); setReclamoOpen(true); break;
         case 'imprimir': imprimirButtonRef.current?.click(); break;
         case 'descargar': descargarButtonRef.current?.click(); break;
         case 'whatsapp': whatsappLinkRef.current?.click(); break;
         case 'buscar-otra': resetSearch(); break;
-        case 'show-photo': setShowPhoto(true); break;
+        case 'show-photo': closeAllModals(); setShowPhoto(true); break;
         case 'close-photo': setShowPhoto(false); break;
       }
     };
     window.addEventListener('voice:ai-click', handler);
     return () => window.removeEventListener('voice:ai-click', handler);
-  }, [hasSearched, resetSearch, speak]);
+  }, [hasSearched, resetSearch, speak, showGuidance, closeAllModals]);
 
   return (
     <div className="min-h-screen bg-zinc-50/50">
