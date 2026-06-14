@@ -1,18 +1,20 @@
+import { Link } from "react-router-dom";
 import { Bell, Check, FileText, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
 
 export default function PageInicial() {
+  const navigate = useNavigate();
+
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-platform-blue p-3 text-platform-blue-foreground sm:p-6">
       <div className="pointer-events-none absolute inset-0 text-platform-blue-foreground/15 bg-[radial-gradient(circle_at_1px_1px,currentColor_1.25px,transparent_0)] bg-size-[26px_26px]" />
@@ -40,6 +42,7 @@ export default function PageInicial() {
           <div className="grid gap-3 sm:gap-4 md:grid-cols-2">
             <button
               type="button"
+              onClick={() => navigate("/consulta-en-linea")}
               className="group flex min-h-36 flex-col items-center justify-center gap-3 rounded-xl border bg-background p-4 text-center shadow-sm transition hover:border-platform-blue/40 hover:bg-accent focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none sm:min-h-40 sm:p-5 md:min-h-48 md:gap-4 md:p-6"
             >
               <div className="flex size-12 items-center justify-center rounded-full bg-platform-blue/10 text-platform-blue transition group-hover:bg-platform-blue group-hover:text-platform-blue-foreground sm:size-14 md:size-16">
@@ -55,8 +58,8 @@ export default function PageInicial() {
               </div>
             </button>
 
-            <button
-              type="button"
+            <Link
+              to="/notificame/registro"
               className="group relative flex min-h-36 flex-col items-center justify-center gap-3 rounded-xl border bg-background p-4 text-center shadow-sm transition hover:border-platform-blue/40 hover:bg-accent focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none sm:min-h-40 sm:p-5 md:min-h-48 md:gap-4 md:p-6"
             >
               <Badge variant="destructive" className="absolute top-3 right-3 sm:top-4 sm:right-4">
@@ -80,19 +83,9 @@ export default function PageInicial() {
                   obligaciones con el SAT a través de Whatsapp y Correo electrónico.
                 </p>
               </div>
-            </button>
+            </Link>
           </div>
         </CardContent>
-
-        <CardFooter className="justify-center px-4 pt-2 sm:px-6">
-          <Button
-            type="button"
-            size="lg"
-            className="w-full bg-platform-blue text-platform-blue-foreground hover:bg-platform-blue/90 sm:w-auto sm:px-12"
-          >
-            Continuar
-          </Button>
-        </CardFooter>
       </Card>
     </main>
   );
