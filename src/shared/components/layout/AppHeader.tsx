@@ -6,6 +6,7 @@ import {
 import { format } from "date-fns";
 import { es } from "date-fns/locale/es";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -19,10 +20,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { queryClient } from "@/app/providers/QueryProvider";
+import { LanguageSelector } from "@/shared/components/LanguageSelector";
 
 export const AppHeader = () => {
   const { user, clearAuth } = useAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const today = new Date();
   const formattedDate = format(today, "EEEE, d 'de' MMMM 'de' yyyy", {
@@ -47,7 +50,7 @@ export const AppHeader = () => {
         {/* Bienvenida */}
         <div className="min-w-0 pr-2">
           <p className="text-sm sm:text-base font-semibold text-zinc-900 leading-tight truncate">
-            ¡Bienvenido, {user?.username ?? "usuario"}!
+            {t("layout.header.welcome", { username: user?.username ?? t("common.user") })}
           </p>
           <p className="text-[11px] sm:text-xs text-zinc-500 truncate">
             {capitalizedDate}
@@ -56,6 +59,7 @@ export const AppHeader = () => {
 
         {/* Controles derechos */}
         <div className="flex items-center gap-0.5 sm:gap-1">
+          <LanguageSelector className="hidden sm:inline-flex" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="ml-1 h-auto px-2 py-1.5">
@@ -79,14 +83,14 @@ export const AppHeader = () => {
               <DropdownMenuGroup>
                 <DropdownMenuItem>
                   <User />
-                  Mi perfil
+                  {t("layout.header.myProfile")}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                   <LogOut />
-                  Cerrar sesion
+                  {t("layout.header.logout")}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>

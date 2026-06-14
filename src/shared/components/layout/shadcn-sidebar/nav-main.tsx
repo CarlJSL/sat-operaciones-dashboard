@@ -1,6 +1,7 @@
 import * as React from "react"
 import { ChevronRight, type LucideIcon } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 
 import {
   Collapsible,
@@ -33,6 +34,7 @@ export function NavMain({
   }[]
 }) {
   const location = useLocation()
+  const { t } = useTranslation()
   const currentUrl = `${location.pathname}${location.search}`
   const [openTitle, setOpenTitle] = React.useState<string | null>(null)
 
@@ -47,7 +49,7 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Menu</SidebarGroupLabel>
+      <SidebarGroupLabel>{t("common.menu")}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const isItemActive =

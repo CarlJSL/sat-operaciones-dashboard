@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Loader2, Mail, RefreshCwIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 import { queryClient } from "@/app/providers/QueryProvider";
@@ -27,6 +28,7 @@ import { verifyCodeSchema, type VerifyCodeFormulario } from "@/domain/auth";
 import { authService } from "@/features/auth/api/auth.service";
 import { useSuccessStore } from "@/shared/store/successStore";
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
+import { LanguageSelector } from "@/shared/components/LanguageSelector";
 
 type VerifyCodeState = {
   correo?: string;
@@ -34,6 +36,7 @@ type VerifyCodeState = {
 };
 
 export default function VerifyCodePage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const state = (location.state ?? {}) as VerifyCodeState;
@@ -73,8 +76,8 @@ export default function VerifyCodePage() {
       queryClient.invalidateQueries({ queryKey: ["auth"] });
 
       useSuccessStore.getState().show({
-        title: "Código reenviado",
-        description: "Se ha enviado un nuevo código",
+        title: t("platform.notify.verify.resentTitle"),
+        description: t("platform.notify.verify.resentDescription"),
       });
     },
   });
@@ -93,8 +96,8 @@ export default function VerifyCodePage() {
   function handleResend() {
     if (isNotificameFlow) {
       useSuccessStore.getState().show({
-        title: "Código reenviado",
-        description: "Se ha enviado un nuevo código al correo.",
+        title: t("platform.notify.verify.resentTitle"),
+        description: t("platform.notify.verify.resentDescription"),
       });
       return;
     }
@@ -108,6 +111,9 @@ export default function VerifyCodePage() {
       <div className="pointer-events-none absolute inset-0 text-platform-blue-foreground/10 bg-[linear-gradient(135deg,currentColor_1px,transparent_1px),linear-gradient(45deg,currentColor_1px,transparent_1px)] bg-position-[0_0,14px_14px] bg-size-[56px_56px]" />
 
       <Card className="relative w-full max-w-2xl border-0 bg-card/95 py-6 text-card-foreground shadow-2xl sm:py-8">
+        <div className="flex justify-end px-4 sm:px-8">
+          <LanguageSelector />
+        </div>
         <CardHeader className="items-center gap-5 px-4 text-center sm:px-8">
           <div className="flex w-full justify-center">
             <img
@@ -123,10 +129,10 @@ export default function VerifyCodePage() {
           </div>
           <div className="flex flex-col gap-2">
             <CardTitle className="text-xl font-semibold text-platform-blue sm:text-2xl">
-              Verifica tu correo
+              {t("platform.notify.verify.title")}
             </CardTitle>
             <CardDescription>
-              Ingresa el código de 6 dígitos enviado a{" "}
+              {t("platform.notify.verify.description")}{" "}
               <Badge variant="secondary" className="align-middle">
                 {correo}
               </Badge>
@@ -134,7 +140,7 @@ export default function VerifyCodePage() {
           </div>
           {isNotificameFlow && (
             <CardDescription>
-              Este paso valida tu correo antes de activar las notificaciones.
+              {t("platform.notify.verify.notifyDescription")}
             </CardDescription>
           )}
         </CardHeader>
@@ -145,7 +151,7 @@ export default function VerifyCodePage() {
               <Field>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <FieldLabel htmlFor="otp-verification">
-                    Código de verificación
+                    {t("platform.notify.verify.codeLabel")}
                   </FieldLabel>
                   <Button
                     type="button"
@@ -158,7 +164,7 @@ export default function VerifyCodePage() {
                       data-icon="inline-start"
                       className={isResending ? "animate-spin" : undefined}
                     />
-                    {isResending ? "Enviando..." : "Reenviar código"}
+                    {isResending ? t("platform.notify.verify.resending") : t("platform.notify.verify.resend")}
                   </Button>
                 </div>
 
@@ -205,11 +211,11 @@ export default function VerifyCodePage() {
                 disabled={isPending}
               >
                 {isPending && <Loader2 data-icon="inline-start" className="animate-spin" />}
-                {isPending ? "Validando..." : "Verificar código"}
+                {isPending ? t("platform.notify.verify.validating") : t("platform.notify.verify.verifyCode")}
               </Button>
               <Button asChild variant="link" className="text-platform-blue">
                 <Link to={isNotificameFlow ? "/notificame/registro" : "/forgot-password"}>
-                  Volver
+                  {t("platform.notify.verify.back")}
                 </Link>
               </Button>
             </CardFooter>

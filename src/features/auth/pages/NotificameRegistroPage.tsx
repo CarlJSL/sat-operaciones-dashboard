@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,9 +31,11 @@ import {
 } from "@/components/ui/select";
 import loginImage from "@/assets/images/login-img.jpg";
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
+import { LanguageSelector } from "@/shared/components/LanguageSelector";
 
 export default function NotificameRegistroPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <main className="relative flex min-h-svh items-center justify-center overflow-hidden bg-platform-blue p-3 text-platform-blue-foreground sm:p-6">
@@ -41,6 +44,9 @@ export default function NotificameRegistroPage() {
 
       <Card className="relative w-full max-w-5xl overflow-hidden border-0 bg-card/95 py-0 text-card-foreground shadow-2xl lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.85fr)] lg:gap-0">
         <div className="flex flex-col py-5 sm:py-7">
+          <div className="flex justify-end px-4 sm:px-8">
+            <LanguageSelector />
+          </div>
         <CardHeader className="items-center gap-4 px-4 text-center sm:px-8">
           <div className="flex w-full justify-center">
             <img
@@ -51,11 +57,10 @@ export default function NotificameRegistroPage() {
           </div>
           <div className="flex flex-col gap-2">
             <CardTitle className="text-xl font-semibold text-platform-blue sm:text-2xl">
-              Registro Notifícame
+              {t("platform.notify.register.title")}
             </CardTitle>
             <CardDescription>
-              Registra tus datos para recibir notificaciones y alertas sobre tus
-              trámites, multas y obligaciones.
+              {t("platform.notify.register.description")}
             </CardDescription>
           </div>
         </CardHeader>
@@ -75,15 +80,15 @@ export default function NotificameRegistroPage() {
           >
             <FieldGroup className="gap-5">
               <Field>
-                <FieldLabel htmlFor="tipo-documento">Tipo documento</FieldLabel>
+                <FieldLabel htmlFor="tipo-documento">{t("platform.notify.register.documentType")}</FieldLabel>
                 <Select>
                   <SelectTrigger id="tipo-documento" className="w-full">
-                    <SelectValue placeholder="Selecciona un tipo de documento" />
+                    <SelectValue placeholder={t("platform.notify.register.documentTypePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
                       <SelectItem value="dni">DNI</SelectItem>
-                      <SelectItem value="ce">Carné de extranjería</SelectItem>
+                      <SelectItem value="ce">{t("platform.notify.register.foreignerCard")}</SelectItem>
                       <SelectItem value="ruc">RUC</SelectItem>
                     </SelectGroup>
                   </SelectContent>
@@ -91,26 +96,26 @@ export default function NotificameRegistroPage() {
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="documento">Documento</FieldLabel>
+                <FieldLabel htmlFor="documento">{t("platform.notify.register.document")}</FieldLabel>
                 <Input
                   id="documento"
                   inputMode="numeric"
-                  placeholder="Ingresa tu número de documento"
+                  placeholder={t("platform.notify.register.documentPlaceholder")}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="telefono">Teléfono</FieldLabel>
+                <FieldLabel htmlFor="telefono">{t("platform.notify.register.phone")}</FieldLabel>
                 <Input
                   id="telefono"
                   type="tel"
                   inputMode="tel"
-                  placeholder="Ingresa tu número de teléfono"
+                  placeholder={t("platform.notify.register.phonePlaceholder")}
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="correo">Correo electrónico</FieldLabel>
+                <FieldLabel htmlFor="correo">{t("platform.notify.register.email")}</FieldLabel>
                 <Input
                   id="correo"
                   name="correo"
@@ -123,11 +128,10 @@ export default function NotificameRegistroPage() {
                 <Checkbox id="terminos" />
                 <FieldContent>
                   <FieldLabel htmlFor="terminos">
-                    Acepto términos y condiciones
+                    {t("platform.notify.register.terms")}
                   </FieldLabel>
                   <FieldDescription>
-                    Autorizo el envío de notificaciones por WhatsApp y correo
-                    electrónico sobre trámites, multas y obligaciones.
+                    {t("platform.notify.register.authorization")}
                   </FieldDescription>
                 </FieldContent>
               </Field>
@@ -136,7 +140,7 @@ export default function NotificameRegistroPage() {
                 <div className="flex items-center gap-3 rounded-md border bg-background p-4">
                   <Checkbox id="recaptcha-mock" />
                   <FieldContent>
-                    <FieldTitle>No soy un robot</FieldTitle>
+                    <FieldTitle>{t("platform.notify.register.notRobot")}</FieldTitle>
                     <FieldDescription>
                     </FieldDescription>
                   </FieldContent>
@@ -150,14 +154,14 @@ export default function NotificameRegistroPage() {
               size="lg"
               className="w-full bg-platform-blue text-platform-blue-foreground hover:bg-platform-blue/90"
             >
-              Registrar
+              {t("platform.notify.register.submit")}
             </Button>
           </form>
         </CardContent>
 
         <CardFooter className="justify-center px-4 sm:px-8">
           <Button asChild variant="link" className="text-platform-blue">
-            <Link to="/inicio">Volver a selección de plataforma</Link>
+            <Link to="/inicio">{t("platform.notify.register.backToPlatform")}</Link>
           </Button>
         </CardFooter>
         </div>
@@ -165,7 +169,7 @@ export default function NotificameRegistroPage() {
         <div className="relative hidden min-h-full bg-muted lg:block">
           <img
             src={loginImage}
-            alt="Persona recibiendo notificaciones digitales"
+            alt={t("platform.notify.register.imageAlt")}
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-platform-blue/20" />

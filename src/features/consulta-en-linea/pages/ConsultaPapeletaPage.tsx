@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Search, CheckCircle2, Clock, AlertTriangle, ArrowRight, Loader2, ArrowLeft, Eye, X } from "lucide-react";
 import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
@@ -18,10 +19,12 @@ import { useVoiceContext } from "@/features/voice/context/voiceContext";
 import { useSpeechSynthesis } from "@/features/voice/hooks/useSpeechSynthesis";
 import { normalize } from "@/features/voice/services/commandMatcher";
 import infractionImage from "@/assets/images/image.webp";
+import { LanguageSelector } from "@/shared/components/LanguageSelector";
 
 export default function ConsultaPapeletaPage() {
   const { numeroDePapeleta } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const { registerCommand, showGuidance } = useVoiceContext();
   const { speak } = useSpeechSynthesis();
@@ -55,16 +58,58 @@ export default function ConsultaPapeletaPage() {
   });
 
   const pasosPAS = [
-    { id: 0, title: "Inicio", desc: "Ciudadano recibe la papeleta", status: "completed", deadline: "Día 0" },
-    { id: 1, title: "Emisión Informe", desc: "Opinión sobre infracción (IFI)", status: "completed", deadline: "Plazo 5 días" },
-    { id: 2, title: "Notificación", desc: "Notificación del informe", status: "current", deadline: "Plazo 5 días" },
-    { id: 3, title: "Resolución", desc: "Resol. Final de Sanción (RFS)", status: "upcoming", deadline: "Plazo 5 días" },
-    { id: 4, title: "Sanción Firme", desc: "Respuesta de apelación", status: "upcoming", deadline: "15 días hábiles" },
+    {
+      id: 0,
+      title: t("platform.consultation.timeline.pas.start.title"),
+      desc: t("platform.consultation.timeline.pas.start.desc"),
+      status: "completed",
+      deadline: t("platform.consultation.timeline.dayZero"),
+    },
+    {
+      id: 1,
+      title: t("platform.consultation.timeline.pas.reportIssue.title"),
+      desc: t("platform.consultation.timeline.pas.reportIssue.desc"),
+      status: "completed",
+      deadline: t("platform.consultation.timeline.fiveDayTerm"),
+    },
+    {
+      id: 2,
+      title: t("platform.consultation.timeline.pas.notification.title"),
+      desc: t("platform.consultation.timeline.pas.notification.desc"),
+      status: "current",
+      deadline: t("platform.consultation.timeline.fiveDayTerm"),
+    },
+    {
+      id: 3,
+      title: t("platform.consultation.timeline.pas.resolution.title"),
+      desc: t("platform.consultation.timeline.pas.resolution.desc"),
+      status: "upcoming",
+      deadline: t("platform.consultation.timeline.fiveDayTerm"),
+    },
+    {
+      id: 4,
+      title: t("platform.consultation.timeline.pas.finalPenalty.title"),
+      desc: t("platform.consultation.timeline.pas.finalPenalty.desc"),
+      status: "upcoming",
+      deadline: t("platform.consultation.timeline.fifteenBusinessDays"),
+    },
   ];
 
   const pasosPEC = [
-    { id: 5, title: "Inicio PEC", desc: "Resol. de Ejecución Coactiva", status: "upcoming", deadline: "Si deuda pendiente" },
-    { id: 6, title: "Medidas Cautelares", desc: "Embargo o captura de vehículo", status: "upcoming", deadline: "7 días hábiles" },
+    {
+      id: 5,
+      title: t("platform.consultation.timeline.pec.start.title"),
+      desc: t("platform.consultation.timeline.pec.start.desc"),
+      status: "upcoming",
+      deadline: t("platform.consultation.timeline.ifPendingDebt"),
+    },
+    {
+      id: 6,
+      title: t("platform.consultation.timeline.pec.precautionaryMeasures.title"),
+      desc: t("platform.consultation.timeline.pec.precautionaryMeasures.desc"),
+      status: "upcoming",
+      deadline: t("platform.consultation.timeline.sevenBusinessDays"),
+    },
   ];
 
   const performSearch = useCallback(async (query: string) => {
@@ -90,13 +135,13 @@ export default function ConsultaPapeletaPage() {
         etapaActual: 2
       });
       setHasSearched(true);
-      toast.success("Información recuperada correctamente");
+      toast.success(t("platform.consultation.searchSuccess"));
     } else {
-      toast.error("No se encontró la papeleta ingresada");
+      toast.error(t("platform.consultation.searchNotFound"));
       setHasSearched(false);
     }
     setIsLoading(false);
-  }, []);
+  }, [t]);
 
   // Sync URL route param to state
   useEffect(() => {
@@ -292,25 +337,26 @@ export default function ConsultaPapeletaPage() {
           <div className="pointer-events-none absolute inset-0 text-white/5 bg-[radial-gradient(circle_at_1px_1px,currentColor_1.25px,transparent_0)] bg-size-[32px_32px]" />
           
           {/* Breadcrumb for Search State */}
-          <div className="z-20 mx-auto w-full max-w-6xl mb-8">
+          <div className="z-20 mx-auto mb-8 flex w-full max-w-6xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem><BreadcrumbLink asChild><Link to="/inicio" className="text-blue-100 hover:text-white transition-colors">Inicio</Link></BreadcrumbLink></BreadcrumbItem>
+                <BreadcrumbItem><BreadcrumbLink asChild><Link to="/inicio" className="text-blue-100 hover:text-white transition-colors">{t("common.home")}</Link></BreadcrumbLink></BreadcrumbItem>
                 <BreadcrumbSeparator className="text-white/30" />
-                <BreadcrumbItem><BreadcrumbLink asChild><Link to="/consulta-en-linea" className="text-blue-100 hover:text-white transition-colors">Consulta en Línea</Link></BreadcrumbLink></BreadcrumbItem>
+                <BreadcrumbItem><BreadcrumbLink asChild><Link to="/consulta-en-linea" className="text-blue-100 hover:text-white transition-colors">{t("platform.consultation.title")}</Link></BreadcrumbLink></BreadcrumbItem>
                 <BreadcrumbSeparator className="text-white/30" />
-                <BreadcrumbItem><BreadcrumbPage className="text-white font-black uppercase">Papeletas</BreadcrumbPage></BreadcrumbItem>
+                <BreadcrumbItem><BreadcrumbPage className="text-white font-black uppercase">{t("platform.consultation.ticketsBreadcrumb")}</BreadcrumbPage></BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
+            <LanguageSelector />
           </div>
 
           <div className="z-10 m-auto w-full max-w-2xl space-y-10 text-center pb-20">
             <div className="space-y-4">
               <h1 className="text-4xl font-black uppercase tracking-tight md:text-5xl">
-                Consulta de Papeletas
+                {t("platform.consultation.ticketsTitle")}
               </h1>
               <p className="text-lg font-medium text-blue-100/80">
-                Ingresa el número de tu papeleta de infracción (PIT) para conocer su estado y ruta legal paso a paso.
+                {t("platform.consultation.ticketsDescription")}
               </p>
             </div>
 
@@ -323,7 +369,7 @@ export default function ConsultaPapeletaPage() {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Escribe el Nº..."
+                      placeholder={t("platform.consultation.ticketInputPlaceholder")}
                       className="w-full bg-transparent border-0 h-14 md:h-20 pl-12 md:pl-16 pr-4 text-lg md:text-2xl font-bold text-white placeholder:text-white/30 focus:ring-0 outline-none uppercase"
                       disabled={isLoading}
                     />
@@ -333,23 +379,23 @@ export default function ConsultaPapeletaPage() {
                     disabled={isLoading}
                     className="h-11 md:h-16 px-6 md:px-10 rounded-xl md:rounded-2xl bg-white text-platform-blue hover:bg-blue-50 text-sm md:text-xl font-black shadow-xl disabled:bg-white/50"
                   >
-                    {isLoading ? <Loader2 className="size-5 md:size-8 animate-spin" /> : "BUSCAR"}
+                    {isLoading ? <Loader2 className="size-5 md:size-8 animate-spin" /> : t("platform.consultation.searchButton")}
                   </Button>
                 </div>
               </div>
               <div className="mt-6 flex flex-wrap justify-center gap-6">
                 <Link to="/inicio" className="text-sm font-bold text-white/60 hover:text-white flex items-center gap-2 transition-colors">
-                  <ArrowLeft className="size-4" /> Volver al menú principal
+                  <ArrowLeft className="size-4" /> {t("platform.consultation.backToMainMenu")}
                 </Link>
                 <span className="text-white/20">|</span>
                 <p className="text-sm font-medium text-white/50 italic">
-                  Ejemplo: CP155801 o A1G359
+                  {t("platform.consultation.ticketExample")}
                 </p>
               </div>
             </form>
           </div>
           <div className="absolute bottom-8 text-center opacity-40">
-             <p className="text-[10px] font-black uppercase tracking-[0.3em]">Servicio de Administración Tributaria - SAT 2026</p>
+             <p className="text-[10px] font-black uppercase tracking-[0.3em]">{t("platform.consultation.satFooter")}</p>
           </div>
         </main>
       )}
@@ -360,34 +406,37 @@ export default function ConsultaPapeletaPage() {
           <div className="mx-auto max-w-6xl mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <Breadcrumb>
               <BreadcrumbList>
-                <BreadcrumbItem><BreadcrumbLink asChild><Link to="/inicio">Inicio</Link></BreadcrumbLink></BreadcrumbItem>
+                <BreadcrumbItem><BreadcrumbLink asChild><Link to="/inicio">{t("common.home")}</Link></BreadcrumbLink></BreadcrumbItem>
                 <BreadcrumbSeparator />
-                <BreadcrumbItem><BreadcrumbLink asChild><Link to="/consulta-en-linea">Consulta en Línea</Link></BreadcrumbLink></BreadcrumbItem>
+                <BreadcrumbItem><BreadcrumbLink asChild><Link to="/consulta-en-linea">{t("platform.consultation.title")}</Link></BreadcrumbLink></BreadcrumbItem>
                 <BreadcrumbSeparator />
-                <BreadcrumbItem><BreadcrumbLink asChild><button onClick={resetSearch}>Papeletas</button></BreadcrumbLink></BreadcrumbItem>
+                <BreadcrumbItem><BreadcrumbLink asChild><button onClick={resetSearch}>{t("platform.consultation.ticketsBreadcrumb")}</button></BreadcrumbLink></BreadcrumbItem>
                 <BreadcrumbSeparator />
-                <BreadcrumbItem><BreadcrumbPage>Seguimiento #{papeletaActual.nro}</BreadcrumbPage></BreadcrumbItem>
+                <BreadcrumbItem><BreadcrumbPage>{t("platform.consultation.trackingBreadcrumb", { ticket: papeletaActual.nro })}</BreadcrumbPage></BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <Button variant="outline" onClick={resetSearch} className="border-platform-blue text-platform-blue font-bold gap-2">
-              <Search className="size-4" /> BUSCAR OTRA
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <LanguageSelector />
+              <Button variant="outline" onClick={resetSearch} className="border-platform-blue text-platform-blue font-bold gap-2">
+                <Search className="size-4" /> {t("platform.consultation.searchAnother")}
+              </Button>
+            </div>
           </div>
 
           <div className="mx-auto max-w-6xl space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="space-y-1">
-              <h1 className="text-3xl font-black tracking-tight text-platform-blue md:text-4xl uppercase">Ruta de tu Papeleta</h1>
-              <p className="text-zinc-500 font-medium italic">Viendo expediente digital recuperado para {papeletaActual.placa}</p>
+              <h1 className="text-3xl font-black tracking-tight text-platform-blue md:text-4xl uppercase">{t("platform.consultation.trackingTitle")}</h1>
+              <p className="text-zinc-500 font-medium italic">{t("platform.consultation.trackingDescription", { plate: papeletaActual.placa })}</p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-2xl border bg-white p-5 shadow-sm">
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Nº Papeleta</p>
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">{t("platform.consultation.ticketNumber")}</p>
                 <p className="text-xl font-black text-platform-blue tracking-tight">{papeletaActual.nro}</p>
               </div>
               <div className="rounded-2xl border bg-white p-5 shadow-sm group relative overflow-hidden">
                 <div className="relative z-10">
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Placa Vehicular</p>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">{t("platform.consultation.vehiclePlate")}</p>
                   <div className="flex items-center justify-between">
                     <p className="text-xl font-black text-platform-blue tracking-tight">{papeletaActual.placa}</p>
                   </div>
@@ -395,7 +444,7 @@ export default function ConsultaPapeletaPage() {
                     onClick={() => setShowPhoto(true)}
                     className="mt-3 text-[10px] font-black text-platform-blue hover:text-platform-blue/80 uppercase tracking-widest flex items-center gap-2 transition-all underline underline-offset-4 decoration-2 decoration-blue-200 hover:decoration-platform-blue"
                   >
-                    Detalle de la infracción <ArrowRight className="size-3" />
+                    {t("platform.consultation.infractionDetail")} <ArrowRight className="size-3" />
                   </button>
                 </div>
                 <div className="absolute -right-2 -bottom-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
@@ -403,25 +452,25 @@ export default function ConsultaPapeletaPage() {
                 </div>
               </div>
               <div className="rounded-2xl border bg-white p-5 shadow-sm">
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Importe Original</p>
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">{t("platform.consultation.originalAmount")}</p>
                 <p className="text-xl font-black text-platform-blue tracking-tight">S/ {papeletaActual.importe}</p>
               </div>
               <div className="rounded-2xl border-2 border-green-500 bg-green-50/50 p-5 shadow-lg shadow-green-100">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-[10px] font-black text-green-700 uppercase tracking-widest">Total a Pagar</p>
-                  <CustomBadge className="bg-green-500 text-white text-[9px] px-1.5 py-0 border-0 uppercase">Ahorro Activo</CustomBadge>
+                  <p className="text-[10px] font-black text-green-700 uppercase tracking-widest">{t("platform.consultation.totalToPay")}</p>
+                  <CustomBadge className="bg-green-500 text-white text-[9px] px-1.5 py-0 border-0 uppercase">{t("platform.consultation.activeSaving")}</CustomBadge>
                 </div>
                 <p className="text-3xl font-black text-green-600 tracking-tight">S/ {papeletaActual.deuda}</p>
-                <p className="mt-2 text-[10px] text-green-700/80 font-bold italic">Ahorras S/ {papeletaActual.descuento} si pagas hoy</p>
+                <p className="mt-2 text-[10px] text-green-700/80 font-bold italic">{t("platform.consultation.savingToday", { amount: papeletaActual.descuento })}</p>
               </div>
             </div>
 
             <div className="rounded-3xl border bg-white shadow-2xl shadow-zinc-200/50 overflow-hidden">
               <div className="bg-platform-blue px-6 py-6 flex items-center justify-between">
-                 <h2 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3"><ArrowRight className="size-5 text-blue-300" /> Flujo de Tránsito</h2>
+                 <h2 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3"><ArrowRight className="size-5 text-blue-300" /> {t("platform.consultation.trafficFlow")}</h2>
                  <div className="hidden sm:flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full"><div className="size-2.5 rounded-full bg-green-400" /><span className="text-[10px] font-bold text-white uppercase">Completado</span></div>
-                    <div className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full"><div className="size-2.5 rounded-full bg-blue-300 animate-pulse" /><span className="text-[10px] font-bold text-white uppercase">En Proceso</span></div>
+                    <div className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full"><div className="size-2.5 rounded-full bg-green-400" /><span className="text-[10px] font-bold text-white uppercase">{t("platform.consultation.completed")}</span></div>
+                    <div className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full"><div className="size-2.5 rounded-full bg-blue-300 animate-pulse" /><span className="text-[10px] font-bold text-white uppercase">{t("platform.consultation.inProgress")}</span></div>
                  </div>
               </div>
               <div className="p-6 md:p-12 lg:p-16">
@@ -431,7 +480,7 @@ export default function ConsultaPapeletaPage() {
                     <div className="relative grid gap-y-16 md:grid-cols-5">
                       {pasosPAS.map((paso, idx) => (
                         <div key={paso.id} className="group relative flex flex-col items-center">
-                          {idx === 2 && (<div className="pointer-events-none absolute -top-16 left-1/2 z-0 hidden w-[450%] -translate-x-1/2 text-center md:block"><span className="rounded-full bg-green-100 px-5 py-2 text-[10px] font-black tracking-[0.3em] text-green-700 uppercase shadow-sm">PROCEDIMIENTO ADMINISTRATIVO SANCIONADOR (PAS)</span></div>)}
+                          {idx === 2 && (<div className="pointer-events-none absolute -top-16 left-1/2 z-0 hidden w-[450%] -translate-x-1/2 text-center md:block"><span className="rounded-full bg-green-100 px-5 py-2 text-[10px] font-black tracking-[0.3em] text-green-700 uppercase shadow-sm">{t("platform.consultation.timeline.pasLabel")}</span></div>)}
                           <div className={cn("relative z-10 flex size-14 items-center justify-center rounded-full border-4 shadow-xl transition-all duration-500", paso.status === "completed" ? "border-white bg-green-500 text-white" : paso.status === "current" ? "scale-125 border-blue-50 bg-platform-blue text-white ring-8 ring-platform-blue/5" : "border-zinc-50 bg-white text-zinc-300")}>
                             {paso.status === "completed" ? <CheckCircle2 className="size-7" /> : paso.status === "current" ? <Clock className="size-7 animate-spin-slow" /> : <span className="text-lg font-black">{idx + 1}</span>}
                           </div>
@@ -449,7 +498,7 @@ export default function ConsultaPapeletaPage() {
                     <div className="relative grid gap-y-16 md:grid-cols-2">
                       {pasosPEC.map((paso, idx) => (
                         <div key={paso.id} className="group relative flex flex-col items-center">
-                          {idx === 0 && (<div className="pointer-events-none absolute -top-16 left-full z-0 hidden w-[200%] -translate-x-1/2 text-center md:block"><span className="inline-flex rounded-full bg-orange-100 px-4 py-2 text-[10px] font-black tracking-[0.2em] whitespace-nowrap text-orange-700 uppercase shadow-sm">EJECUCIÓN COACTIVA (PEC)</span></div>)}
+                          {idx === 0 && (<div className="pointer-events-none absolute -top-16 left-full z-0 hidden w-[200%] -translate-x-1/2 text-center md:block"><span className="inline-flex rounded-full bg-orange-100 px-4 py-2 text-[10px] font-black tracking-[0.2em] whitespace-nowrap text-orange-700 uppercase shadow-sm">{t("platform.consultation.timeline.pecLabel")}</span></div>)}
                           <div className="z-10 flex size-14 items-center justify-center rounded-full border-4 border-zinc-50 bg-white text-zinc-300 shadow-xl"><span className="text-lg font-black">{pasosPAS.length + idx + 1}</span></div>
                           <div className="mt-8 max-w-[120px] space-y-1 text-center">
                             <h3 className="flex h-8 items-center justify-center text-xs leading-tight font-black tracking-tighter text-zinc-400 uppercase">{paso.title}</h3>
@@ -465,8 +514,8 @@ export default function ConsultaPapeletaPage() {
                   <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
                     <div className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-platform-blue text-white shadow-2xl rotate-3"><AlertTriangle className="size-10" /></div>
                     <div className="flex-1 space-y-3">
-                      <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-platform-blue animate-ping" /><h4 className="text-xl font-black text-platform-blue uppercase tracking-tight">Acción requerida</h4></div>
-                      <p className="text-sm text-zinc-600 leading-relaxed font-medium">Cuentas con un plazo legal hasta el <b className="text-platform-blue px-1.5 py-0.5 bg-blue-100 rounded">18 de Junio de 2026</b> para proceder con el descargo o beneficiarte del descuento del <span className="text-green-600 font-bold italic">83%</span>.</p>
+                      <div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-platform-blue animate-ping" /><h4 className="text-xl font-black text-platform-blue uppercase tracking-tight">{t("platform.consultation.requiredAction")}</h4></div>
+                      <p className="text-sm text-zinc-600 leading-relaxed font-medium">{t("platform.consultation.requiredActionDescription", { date: t("platform.consultation.requiredActionDate"), discount: "83%" })}</p>
                     </div>
                     <div className="flex flex-col gap-3 shrink-0 sm:flex-row lg:flex-col">
                       <Button
@@ -474,7 +523,7 @@ export default function ConsultaPapeletaPage() {
                         onClick={() => setPagoOpen(true)}
                         className="bg-platform-blue hover:bg-platform-blue/90 shadow-xl shadow-blue-900/10 px-10 py-7 h-auto text-lg font-black transition-all hover:-translate-y-1"
                       >
-                        PAGAR AHORA <ArrowRight className="ml-3 size-6" />
+                        {t("platform.consultation.payNow")} <ArrowRight className="ml-3 size-6" />
                       </Button>
                       <Button
                         ref={reclamoButtonRef}
@@ -482,7 +531,7 @@ export default function ConsultaPapeletaPage() {
                         onClick={() => setReclamoOpen(true)}
                         className="border-platform-blue text-platform-blue font-bold hover:bg-blue-50 py-7 h-auto"
                       >
-                        Presentar Reclamo
+                        {t("platform.consultation.submitClaim")}
                       </Button>
                     </div>
                   </div>
@@ -505,14 +554,14 @@ export default function ConsultaPapeletaPage() {
               <div className="flex-1 bg-zinc-100 min-h-[350px] flex items-center justify-center relative overflow-hidden">
                 <img 
                   src={infractionImage} 
-                  alt="Evidencia" 
+                  alt={t("platform.consultation.evidenceAlt")}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
               </div>
               <div className="w-full md:w-80 p-8 space-y-6 bg-white border-l">
                 <div className="space-y-3">
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Descripción de la Infracción</p>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{t("platform.consultation.infractionDescription")}</p>
                   <div className="space-y-2">
                     <h4 className="text-lg font-black text-platform-blue uppercase leading-tight">{papeletaActual.falta}</h4>
                     <p className="text-[12px] text-zinc-600 font-medium leading-relaxed bg-zinc-50 p-4 rounded-xl border border-zinc-100">
@@ -521,13 +570,13 @@ export default function ConsultaPapeletaPage() {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex justify-between text-sm border-b pb-2"><span className="text-zinc-500 font-medium">Fecha:</span><span className="font-bold text-platform-blue">{papeletaActual.fecha}</span></div>
-                  <div className="flex justify-between text-sm border-b pb-2"><span className="text-zinc-500 font-medium">Ubicación:</span><span className="font-bold text-platform-blue text-right">Av. Javier Prado</span></div>
+                  <div className="flex justify-between text-sm border-b pb-2"><span className="text-zinc-500 font-medium">{t("platform.consultation.date")}</span><span className="font-bold text-platform-blue">{papeletaActual.fecha}</span></div>
+                  <div className="flex justify-between text-sm border-b pb-2"><span className="text-zinc-500 font-medium">{t("platform.consultation.location")}</span><span className="font-bold text-platform-blue text-right">Av. Javier Prado</span></div>
                 </div>
                 <div className="pt-4">
                   <div className="p-4 rounded-xl bg-green-50 border border-green-100 text-center">
-                    <p className="text-[10px] font-black text-green-700 uppercase mb-1">Estado</p>
-                    <p className="text-sm font-black text-green-600 uppercase italic">Registro Verificado</p>
+                    <p className="text-[10px] font-black text-green-700 uppercase mb-1">{t("platform.consultation.status")}</p>
+                    <p className="text-sm font-black text-green-600 uppercase italic">{t("platform.consultation.verifiedRecord")}</p>
                   </div>
                 </div>
               </div>

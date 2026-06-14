@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { ArrowLeft, MessageCircle, Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,11 +14,13 @@ import {
 } from "@/components/ui/breadcrumb";
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
 import { useVoiceContext } from "@/features/voice/context/voiceContext";
+import { LanguageSelector } from "@/shared/components/LanguageSelector";
 
 const WHATSAPP_URL = 'https://wa.me/51999431111';
 
 export default function ConsultaEnLineaOptionsPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { registerCommand } = useVoiceContext();
 
   // Register options page voice commands
@@ -59,12 +62,12 @@ export default function ConsultaEnLineaOptionsPage() {
           <BreadcrumbList className="text-white/80">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to="/inicio" className="hover:text-white transition-colors">Inicio</Link>
+                <Link to="/inicio" className="hover:text-white transition-colors">{t("common.home")}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="text-white/60" />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-white font-semibold">Consulta en Línea</BreadcrumbPage>
+              <BreadcrumbPage className="text-white font-semibold">{t("platform.consultation.title")}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -75,11 +78,14 @@ export default function ConsultaEnLineaOptionsPage() {
           className="text-white hover:bg-white/10 hover:text-white gap-2"
         >
           <ArrowLeft className="size-4" />
-          Volver
+          {t("common.back")}
         </Button>
       </div>
 
       <Card className="relative w-full max-w-4xl border-0 bg-card/95 py-5 text-card-foreground shadow-2xl sm:py-7 md:px-6 lg:px-8">
+        <div className="flex justify-end px-4 sm:px-6">
+          <LanguageSelector />
+        </div>
         <CardHeader className="items-center gap-5 px-4 text-center sm:gap-6 sm:px-6 md:gap-8">
           <div className="flex w-full justify-center">
             <img
@@ -89,10 +95,10 @@ export default function ConsultaEnLineaOptionsPage() {
             />
           </div>
           <CardTitle className="text-xl font-bold text-platform-blue md:text-2xl">
-            Consulta en Línea
+            {t("platform.consultation.title")}
           </CardTitle>
           <CardDescription>
-            Seleccione una de las siguientes opciones para continuar
+            {t("platform.consultation.description")}
           </CardDescription>
         </CardHeader>
 
@@ -107,10 +113,10 @@ export default function ConsultaEnLineaOptionsPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <h2 className="text-lg font-semibold text-foreground">
-                  Consulta por número de papeleta
+                  {t("platform.consultation.ticketSearchTitle")}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Ingresa tu PIT para ver el estado y ruta de tu infracción
+                  {t("platform.consultation.ticketSearchDescription")}
                 </p>
               </div>
             </Link>
@@ -126,10 +132,10 @@ export default function ConsultaEnLineaOptionsPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <h2 className="text-lg font-semibold text-foreground">
-                  Chatbot SAT
+                  {t("platform.consultation.chatbotTitle")}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Atención personalizada vía WhatsApp +51 999 431 111
+                  {t("platform.consultation.chatbotDescription")}
                 </p>
               </div>
             </a>
