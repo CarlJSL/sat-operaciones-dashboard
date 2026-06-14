@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Printer, ExternalLink, CheckCircle2, Clock, AlertTriangle, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
@@ -17,7 +17,8 @@ import { useSpeechSynthesis } from "@/features/voice/hooks/useSpeechSynthesis";
 import { normalize } from "@/features/voice/services/commandMatcher";
 
 export default function ConsultaPapeletaPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? "");
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -30,6 +31,7 @@ export default function ConsultaPapeletaPage() {
   const imprimirButtonRef = useRef<HTMLButtonElement>(null);
   const descargarButtonRef = useRef<HTMLButtonElement>(null);
   const whatsappLinkRef = useRef<HTMLAnchorElement>(null);
+  const autoSearchRef = useRef<string | null>(null);
 
   // Mock initial data
   const [papeletaActual, setPapeletaActual] = useState({
@@ -96,6 +98,47 @@ export default function ConsultaPapeletaPage() {
     setHasSearched(false);
     setSearchQuery("");
   }, []);
+
+  // Auto-search from URL query param (?q=...) — used when AI voice navigates here
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q && autoSearchRef.current !== q) {
+      autoSearchRef.current = q;
+      performSearch(q);
+    }
+  }, [searchParams, performSearch]);
+
+  // AI click events — react to voice:ai-click dispatched by VoiceProvider
+  useEffect(() => {
+    const handleAIClick = (event: Event) => {
+      const { target } = (event as CustomEvent).detail;
+      if (!hasSearched) return; // Only act in results view
+
+      switch (target) {
+        case 'pagar':
+          payButtonRef.current?.click();
+          break;
+        case 'reclamo':
+          reclamoButtonRef.current?.click();
+          break;
+        case 'imprimir':
+          imprimirButtonRef.current?.click();
+          break;
+        case 'descargar':
+          descargarButtonRef.current?.click();
+          break;
+        case 'buscar-otra':
+          resetSearch();
+          break;
+        case 'whatsapp':
+          whatsappLinkRef.current?.click();
+          break;
+      }
+    };
+
+    window.addEventListener('voice:ai-click', handleAIClick);
+    return () => window.removeEventListener('voice:ai-click', handleAIClick);
+  }, [hasSearched, resetSearch]);
 
   // Voice command registration — re-register when search state changes
   useEffect(() => {

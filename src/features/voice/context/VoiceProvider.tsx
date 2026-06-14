@@ -14,11 +14,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import type { VoiceState, UseVoiceCommandOptions, CommandRegistry, VoiceCommandEntry } from '../types/voice.types';
+import type { VoiceState, UseVoiceCommandOptions, CommandRegistry, VoiceCommandEntry, AICmd } from '../types/voice.types';
 import { VoiceContext } from './voiceContext';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
-import { matchCommand, normalize } from '../services/commandMatcher';
+import { matchCommand } from '../services/commandMatcher';
+import { normalize } from '../services/commandMatcher';
 import { createRegistry, registerCommand, unregisterCommand } from '../services/commandRegistry';
+import { aiMatchCommand } from '../services/aiMatcher';
 import { useAuthStore } from '@/features/auth/store/authStore';
 
 /** Debounce cooldown in ms to prevent rapid re-activation. */
@@ -80,34 +82,97 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     };
   }, [navigate, clearAuth]);
 
-  const handleResult = useCallback((transcript: string) => {
+  /** Execute a structured AI command — maps intents to router/state actions. */
+  const executeAICmd = useCallback((cmd: AICmd) => {
+    switch (cmd.action) {
+      case 'navigate':
+        navigate(cmd.route);
+        return true;
+      case 'search': {
+        // If query has no digits/plate pattern, it's probably noise — just navigate
+        const hasIdentifier = /\d/.test(cmd.query) || /[A-Z]{2,}\d/i.test(cmd.query);
+        if (hasIdentifier) {
+          navigate(`/consulta-en-linea/papeletas?q=${encodeURIComponent(cmd.query)}`);
+        } else {
+          navigate('/consulta-en-linea/papeletas');
+        }
+        return true;
+      }
+      case 'click': {
+        // Handle whatsapp globally (works from any page)
+        if (cmd.target === 'whatsapp') {
+          window.open('https://wa.me/51999431111', '_blank');
+          return true;
+        }
+        // Other targets: dispatch custom event so ConsultaPapeletaPage can react
+        window.dispatchEvent(new CustomEvent('voice:ai-click', { detail: { target: cmd.target } }));
+        return true;
+      }
+      case 'global':
+        switch (cmd.command) {
+          case 'back': navigate(-1); return true;
+          case 'home': navigate('/inicio'); return true;
+          case 'logout': clearAuth(); navigate('/login'); return true;
+          case 'help': setCommandHintVisible(true); return true;
+          case 'stop': stopListeningRef.current(); return true;
+          default: return false;
+        }
+      default:
+        return false;
+    }
+  }, [navigate, clearAuth]);
+
+  const handleResult = useCallback(async (transcript: string) => {
     setState('processing');
     setLastTranscript(transcript);
 
+    // 1. Try local pattern matcher first (fast, offline)
     const entry = matchCommand(transcript, registryRef.current);
     if (entry) {
       try {
         entry.action(transcript);
         setState('idle');
+        return;
       } catch {
         setState('error');
         toast.error('Error al ejecutar el comando');
+        return;
       }
-    } else {
-      setState('idle');
-      toast.info('Comando no reconocido');
     }
-  }, []);
 
-  const handleError = useCallback((errorType: string) => {
+    // 2. Fallback to AI (Gemini Flash) — handles natural language
+    const aiCmd = await aiMatchCommand(transcript);
+    if (aiCmd) {
+      const ok = executeAICmd(aiCmd);
+      if (ok) {
+        setState('idle');
+        return;
+      }
+    }
+
+    // 3. Nothing matched — AI either unavailable or rate-limited
+    setState('idle');
+    toast.info('No entendí. ¿Podrías decirlo de otra forma?', {
+      description: 'Esperá unos segundos antes de reintentar.',
+    });
+  }, [executeAICmd]);
+
+  const handleError = useCallback((errorType: string, errorMessage?: string) => {
+    // Log for debugging — open DevTools console to see the exact error
+    console.error(`[Voice] Error: ${errorType}${errorMessage ? ` — ${errorMessage}` : ''}`);
+
     switch (errorType) {
       case 'not-allowed':
         setState('error');
-        toast.error('Micrófono requerido para navegación por voz');
+        toast.error('Micrófono denegado. Permití el acceso en configuración del navegador.');
+        break;
+      case 'service-not-allowed':
+        setState('error');
+        toast.error('Servicio de voz bloqueado. Revisá CSP o configuración de Chrome.');
         break;
       case 'network':
         setState('error');
-        toast.error('Error de conexión. Verifica tu red.');
+        toast.error('Sin conexión a Google. ¿Tenés internet? Probá en https://www.google.com');
         break;
       case 'no-speech':
         // Silent — no speech detected, return to idle
@@ -115,6 +180,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
         break;
       default:
         setState('error');
+        toast.error(`Error de voz: ${errorType}`);
         break;
     }
   }, []);

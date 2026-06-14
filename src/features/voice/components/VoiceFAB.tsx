@@ -159,10 +159,7 @@ export function VoiceFAB() {
         onMouseDown={handleMouseDown}
         onMouseUp={handlePressEnd}
         onMouseLeave={handlePressEnd}
-        onTouchStart={(e) => {
-          e.preventDefault();
-          handlePressStart();
-        }}
+        onTouchStart={handlePressStart}
         onTouchEnd={handlePressEnd}
         onTouchCancel={handlePressEnd}
         aria-label={getAriaLabel()}

@@ -56,3 +56,15 @@ export interface CommandRegistryEntry {
 
 /** Registry keyed by normalized pattern string. */
 export type CommandRegistry = Map<string, CommandRegistryEntry[]>;
+
+// ---------------------------------------------------------------------------
+// AI Matcher types (Gemini Flash fallback)
+// ---------------------------------------------------------------------------
+
+/** Structured intent returned by the AI matcher. */
+export type AICmd =
+  | { action: 'navigate'; route: string; confidence: number }
+  | { action: 'search'; query: string; confidence: number }
+  | { action: 'click'; target: string; confidence: number }
+  | { action: 'global'; command: 'back' | 'home' | 'logout' | 'help' | 'stop'; confidence: number }
+  | { action: 'unknown'; reason: string; confidence: number };
