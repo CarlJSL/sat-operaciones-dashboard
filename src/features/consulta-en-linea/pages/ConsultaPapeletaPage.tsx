@@ -471,7 +471,8 @@ export default function ConsultaPapeletaPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   aria-label={t("platform.consultation.ticketInputPlaceholder")}
-                  className="min-w-0 flex-1 rounded-xl border-0 bg-[#f8fbff] px-4 font-black uppercase text-[#073b72] outline-none"
+                  placeholder={t("platform.consultation.ticketSearchPlaceholder")}
+                  className="min-w-0 flex-1 rounded-xl border-0 bg-[#f8fbff] px-4 font-black uppercase text-[#073b72] outline-none placeholder:text-slate-400"
                   disabled={isLoading}
                 />
                 <Button type="submit" disabled={isLoading} className="rounded-xl bg-platform-blue font-black text-white hover:bg-platform-blue/90">
@@ -501,13 +502,13 @@ export default function ConsultaPapeletaPage() {
               </article>
             </section>
 
-            <section className="mb-5 flex flex-col gap-4 rounded-[22px] border border-blue-100 bg-white/95 p-5 shadow-[0_14px_30px_rgba(15,45,82,.06)] sm:flex-row sm:items-center sm:justify-between">
+            <section className="mb-5 flex flex-col gap-4 rounded-[22px] border border-slate-200 border-l-4 border-l-platform-blue bg-white p-5 shadow-[0_14px_30px_rgba(15,45,82,.06)] sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-platform-blue">{t("platform.consultation.infractionReason")}</span>
-                  <strong className="text-sm font-black text-[#073b72]">{papeletaActual.falta}</strong>
+                  <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">{t("platform.consultation.infractionReason")}</span>
+                  <strong className="rounded-full bg-[#073b72] px-3 py-1 text-xs font-black text-white">{papeletaActual.falta}</strong>
                 </div>
-                <p className="text-sm font-semibold leading-relaxed text-slate-600">{papeletaActual.descripcionFalta}</p>
+                <p className="text-sm font-semibold leading-relaxed text-slate-600">{t("platform.consultation.infractionG40Description")}</p>
               </div>
               <Button variant="outline" onClick={() => setShowPhoto(true)} className="shrink-0 border-platform-blue font-black text-platform-blue hover:bg-blue-50">
                 <Eye className="size-4" /> {t("platform.consultation.viewEvidence")}
@@ -684,7 +685,7 @@ export default function ConsultaPapeletaPage() {
                   <div className="space-y-2">
                     <h4 className="text-lg font-black text-platform-blue uppercase leading-tight">{papeletaActual.falta}</h4>
                     <p className="text-[12px] text-zinc-600 font-medium leading-relaxed bg-zinc-50 p-4 rounded-xl border border-zinc-100">
-                      {papeletaActual.descripcionFalta}
+                      {t("platform.consultation.infractionG40Description")}
                     </p>
                   </div>
                 </div>
