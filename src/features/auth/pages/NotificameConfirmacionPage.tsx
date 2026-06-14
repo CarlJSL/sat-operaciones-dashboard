@@ -67,7 +67,7 @@ export default function NotificameConfirmacionPage() {
 
         <CardFooter className="flex-col gap-3 px-4 sm:px-8">
           <Button asChild className="w-full bg-platform-blue text-platform-blue-foreground hover:bg-platform-blue/90 sm:w-auto sm:px-12">
-            <Link to="/inicio">Finalizar</Link>
+            <Link to="/consulta-en-linea/papeletas">Finalizar</Link>
           </Button>
           <Button asChild variant="link" className="text-platform-blue">
             <Link to="/notificame/registro">Registrar otro usuario</Link>

@@ -367,85 +367,104 @@ export default function ConsultaPapeletaPage() {
               </div>
               
               <div className="p-6 md:p-12 lg:p-16">
-                <div className="relative">
-                  {/* Timeline Line */}
-                  <div className="absolute top-[28px] left-0 h-1 w-full bg-zinc-100 hidden md:block" />
+                <div className="grid gap-0 md:grid-cols-[5fr_2fr]">
+                  {/* PAS Section */}
+                  <div className="relative bg-green-50/100 px-4 pt-16 pb-8 md:px-6">
+                    <div className="absolute top-[92px] left-0 hidden h-1 w-full bg-green-200/80 md:block" />
 
-                  <div className="grid gap-y-16 md:grid-cols-7 relative">
-                    {/* PAS Section */}
-                    {pasosPAS.map((paso, idx) => (
-                      <div key={paso.id} className="relative flex flex-col items-center group">
-                        {idx === 2 && (
-                          <div className="absolute -top-16 left-1/2 w-[450%] -translate-x-1/2 text-center hidden md:block z-0 pointer-events-none">
-                            <span className="text-[10px] font-black text-green-600 bg-green-50 px-5 py-2 rounded-full border border-green-200 uppercase tracking-[0.3em] shadow-sm">
-                              Procedimiento Administrativo Sancionador (PAS)
-                            </span>
+                    <div className="relative grid gap-y-16 md:grid-cols-5">
+                      {pasosPAS.map((paso, idx) => (
+                        <div key={paso.id} className="group relative flex flex-col items-center">
+                          {idx === 2 && (
+                            <div className="pointer-events-none absolute -top-16 left-1/2 z-0 hidden w-[450%] -translate-x-1/2 text-center md:block">
+                              <span className="rounded-full bg-green-100 px-5 py-2 text-[10px] font-black tracking-[0.3em] text-green-700 uppercase shadow-sm">
+                                Procedimiento Administrativo Sancionador (PAS)
+                              </span>
+                            </div>
+                          )}
+
+                          <div
+                            className={cn(
+                              "relative z-10 flex size-14 items-center justify-center rounded-full border-4 shadow-xl transition-all duration-500",
+                              paso.status === "completed"
+                                ? "border-white bg-green-500 text-white"
+                                : paso.status === "current"
+                                  ? "scale-125 border-blue-50 bg-platform-blue text-white ring-8 ring-platform-blue/5"
+                                  : "border-zinc-50 bg-white text-zinc-300"
+                            )}
+                          >
+                            {paso.status === "completed" ? (
+                              <CheckCircle2 className="size-7" />
+                            ) : paso.status === "current" ? (
+                              <Clock className="size-7 animate-spin-slow" />
+                            ) : (
+                              <span className="text-lg font-black">{idx + 1}</span>
+                            )}
                           </div>
-                        )}
 
-                        <div className={cn(
-                          "z-10 flex size-14 items-center justify-center rounded-full border-4 transition-all duration-500 shadow-xl relative",
-                          paso.status === "completed" ? "bg-green-500 border-white text-white" : 
-                          paso.status === "current" ? "bg-platform-blue border-blue-50 text-white scale-125 ring-8 ring-platform-blue/5" : 
-                          "bg-white border-zinc-50 text-zinc-300"
-                        )}>
-                          {paso.status === "completed" ? <CheckCircle2 className="size-7" /> : 
-                           paso.status === "current" ? <Clock className="size-7 animate-spin-slow" /> : 
-                           <span className="text-lg font-black">{idx + 1}</span>}
-                        </div>
-
-                        <div className="mt-8 text-center space-y-1 max-w-[120px]">
-                          <h3 className={cn(
-                            "text-xs font-black uppercase tracking-tighter leading-tight h-8 flex items-center justify-center",
-                            paso.status === "upcoming" ? "text-zinc-400" : "text-platform-blue"
-                          )}>
-                            {paso.title}
-                          </h3>
-                          <p className="text-[10px] leading-tight text-zinc-500 font-medium min-h-[2.5rem] mt-2">
-                            {paso.desc}
-                          </p>
-                          <div className={cn(
-                            "mt-4 inline-flex rounded-md px-3 py-1 text-[9px] font-black uppercase tracking-tight whitespace-nowrap",
-                            paso.status === "completed" ? "bg-green-100 text-green-700" : 
-                            paso.status === "current" ? "bg-blue-100 text-blue-700" : 
-                            "bg-zinc-100 text-zinc-400"
-                          )}>
-                            {paso.deadline}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    {/* PEC Section */}
-                    {pasosPEC.map((paso, idx) => (
-                      <div key={paso.id} className="relative flex flex-col items-center group">
-                        {idx === 0 && (
-                          <div className="absolute -top-16 left-1/2 w-[180%] -translate-x-1/2 text-center hidden md:block z-0 pointer-events-none">
-                            <span className="text-[10px] font-black text-orange-600 bg-orange-50 px-5 py-2 rounded-full border border-orange-200 uppercase tracking-[0.3em] shadow-sm">
-                              Ejecución Coactiva (PEC)
-                            </span>
-                          </div>
-                        )}
-
-                        <div className={cn(
-                          "z-10 flex size-14 items-center justify-center rounded-full border-4 bg-white border-zinc-50 text-zinc-300 shadow-xl"
-                        )}>
-                          <span className="text-lg font-black">{pasosPAS.length + idx + 1}</span>
-                        </div>
-
-                        <div className="mt-8 text-center space-y-1 max-w-[120px]">
-                          <h3 className="text-xs font-black uppercase tracking-tighter leading-tight h-8 flex items-center justify-center text-zinc-400">
-                            {paso.title}
-                          </h3>
-                          <p className="text-[10px] leading-tight text-zinc-500 font-medium min-h-[2.5rem] mt-2">
-                            {paso.desc}
-                          </p>
-                          <div className="mt-4 inline-flex rounded-md bg-zinc-100 px-3 py-1 text-[9px] font-black uppercase tracking-tight text-zinc-400 whitespace-nowrap">
-                            {paso.deadline}
+                          <div className="mt-8 max-w-[120px] space-y-1 text-center">
+                            <h3
+                              className={cn(
+                                "flex h-8 items-center justify-center text-xs leading-tight font-black tracking-tighter uppercase",
+                                paso.status === "upcoming" ? "text-zinc-400" : "text-platform-blue"
+                              )}
+                            >
+                              {paso.title}
+                            </h3>
+                            <p className="mt-2 min-h-[2.5rem] text-[10px] leading-tight font-medium text-zinc-500">
+                              {paso.desc}
+                            </p>
+                            <div
+                              className={cn(
+                                "mt-4 inline-flex rounded-md px-3 py-1 text-[9px] font-black tracking-tight whitespace-nowrap uppercase",
+                                paso.status === "completed"
+                                  ? "bg-green-100 text-green-700"
+                                  : paso.status === "current"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-zinc-100 text-zinc-400"
+                              )}
+                            >
+                              {paso.deadline}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* PEC Section */}
+                  <div className="relative bg-orange-50/80 px-4 pt-16 pb-8 md:px-6">
+                    <div className="absolute top-[92px] left-0 hidden h-1 w-full bg-orange-200/80 md:block" />
+
+                    <div className="relative grid gap-y-16 md:grid-cols-2">
+                      {pasosPEC.map((paso, idx) => (
+                        <div key={paso.id} className="group relative flex flex-col items-center">
+                          {idx === 0 && (
+                            <div className="pointer-events-none absolute -top-16 left-full z-0 hidden w-[200%] -translate-x-1/2 text-center md:block">
+                              <span className="inline-flex rounded-full bg-orange-100 px-4 py-2 text-[10px] font-black tracking-[0.2em] whitespace-nowrap text-orange-700 uppercase shadow-sm">
+                                Ejecución Coactiva (PEC)
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="z-10 flex size-14 items-center justify-center rounded-full border-4 border-zinc-50 bg-white text-zinc-300 shadow-xl">
+                            <span className="text-lg font-black">{pasosPAS.length + idx + 1}</span>
+                          </div>
+
+                          <div className="mt-8 max-w-[120px] space-y-1 text-center">
+                            <h3 className="flex h-8 items-center justify-center text-xs leading-tight font-black tracking-tighter text-zinc-400 uppercase">
+                              {paso.title}
+                            </h3>
+                            <p className="mt-2 min-h-[2.5rem] text-[10px] leading-tight font-medium text-zinc-500">
+                              {paso.desc}
+                            </p>
+                            <div className="mt-4 inline-flex rounded-md bg-zinc-100 px-3 py-1 text-[9px] font-black tracking-tight whitespace-nowrap text-zinc-400 uppercase">
+                              {paso.deadline}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
