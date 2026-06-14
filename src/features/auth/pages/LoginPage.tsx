@@ -2,6 +2,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { loginContextSchema, type LoginContext } from "@/domain/auth";
 import { RolCodigo, type RolCodigoType } from "@/domain/roles";
 import loginImage from "@/assets/images/login-img.jpg";
@@ -9,6 +10,7 @@ import logo from "@/assets/logos/logo.png";
 import { authService } from "@/features/auth/api/auth.service";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { LoginForm } from "@/features/auth/components/login-form";
+import { LanguageSelector } from "@/shared/components/LanguageSelector";
 
 const ROLE_REDIRECTS: Partial<Record<RolCodigoType, string>> = {
   [RolCodigo.ADMIN]: "/usuarios",
@@ -22,6 +24,7 @@ function getDefaultRoute(role: RolCodigoType): string {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const methods = useForm<LoginContext>({
@@ -42,9 +45,12 @@ export default function LoginPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <img src={logo} alt="Logo" className="h-6 w-6 object-contain" />
-          <span className="text-sm font-medium">Sat</span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <img src={logo} alt={t("auth.login.logoAlt")} className="h-6 w-6 object-contain" />
+            <span className="text-sm font-medium">Sat</span>
+          </div>
+          <LanguageSelector />
         </div>
 
         <div className="flex flex-1 items-center justify-center">
@@ -63,7 +69,7 @@ export default function LoginPage() {
       <div className="relative hidden bg-muted lg:block">
         <img
           src={loginImage}
-          alt="Image"
+          alt={t("auth.login.coverAlt")}
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
         />
       </div>
