@@ -12,12 +12,15 @@ import {
 } from "@/components/ui/breadcrumb";
 import { cn } from "@/core/lib/utils";
 import { toast } from "sonner";
+import { ReclamoFlow } from "../components/reclamo-flow";
 
 export default function ConsultaPapeletaPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   
+  const [reclamoOpen, setReclamoOpen] = useState(false);
+
   // Mock initial data
   const [papeletaActual, setPapeletaActual] = useState({
     nro: "CP00155801",
@@ -352,7 +355,11 @@ export default function ConsultaPapeletaPage() {
                       <Button className="bg-platform-blue hover:bg-platform-blue/90 shadow-xl shadow-blue-900/10 px-10 py-7 h-auto text-lg font-black transition-all hover:-translate-y-1">
                         PAGAR AHORA <ArrowRight className="ml-3 size-6" />
                       </Button>
-                      <Button variant="outline" className="border-platform-blue text-platform-blue font-bold hover:bg-blue-50 py-7 h-auto">
+                      <Button
+                        variant="outline"
+                        onClick={() => setReclamoOpen(true)}
+                        className="border-platform-blue text-platform-blue font-bold hover:bg-blue-50 py-7 h-auto"
+                      >
                         Presentar Reclamo
                       </Button>
                     </div>
@@ -390,6 +397,18 @@ export default function ConsultaPapeletaPage() {
           </div>
         </div>
       )}
+
+      <ReclamoFlow
+        open={reclamoOpen}
+        onOpenChange={setReclamoOpen}
+        papeletaNro={papeletaActual.nro}
+        onIrPagar={() => {
+          toast.info("Redirigiendo a la pasarela de pago...");
+        }}
+        onSeguimiento={() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
     </div>
   );
 }
