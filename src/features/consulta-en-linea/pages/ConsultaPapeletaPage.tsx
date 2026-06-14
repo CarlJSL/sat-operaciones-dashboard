@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { cn } from "@/core/lib/utils";
 import { toast } from "sonner";
+import { ReclamoFlow } from "../components/reclamo-flow";
 import infractionImage from "@/assets/images/image.webp";
 
 export default function ConsultaPapeletaPage() {
@@ -22,6 +23,8 @@ export default function ConsultaPapeletaPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [showPhoto, setShowPhoto] = useState(false);
   
+  const [reclamoOpen, setReclamoOpen] = useState(false);
+
   // Mock initial data
   const [papeletaActual, setPapeletaActual] = useState({
     nro: "",
@@ -286,6 +289,16 @@ export default function ConsultaPapeletaPage() {
                       <p className="text-sm text-zinc-600 leading-relaxed font-medium">Cuentas con un plazo legal hasta el <b className="text-platform-blue px-1.5 py-0.5 bg-blue-100 rounded">18 de Junio de 2026</b> para proceder con el descargo o beneficiarte del descuento del <span className="text-green-600 font-bold italic">83%</span>.</p>
                     </div>
                     <div className="flex flex-col gap-3 shrink-0 sm:flex-row lg:flex-col">
+                      <Button className="bg-platform-blue hover:bg-platform-blue/90 shadow-xl shadow-blue-900/10 px-10 py-7 h-auto text-lg font-black transition-all hover:-translate-y-1">
+                        PAGAR AHORA <ArrowRight className="ml-3 size-6" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setReclamoOpen(true)}
+                        className="border-platform-blue text-platform-blue font-bold hover:bg-blue-50 py-7 h-auto"
+                      >
+                        Presentar Reclamo
+                      </Button>
                       <Button className="bg-platform-blue hover:bg-platform-blue/90 shadow-xl shadow-blue-900/10 px-10 py-7 h-auto text-lg font-black transition-all hover:-translate-y-1">PAGAR AHORA <ArrowRight className="ml-3 size-6" /></Button>
                       <Button variant="outline" className="border-platform-blue text-platform-blue font-bold hover:bg-blue-50 py-7 h-auto">Reclamar</Button>
                     </div>
@@ -344,6 +357,18 @@ export default function ConsultaPapeletaPage() {
           </div>
         </div>
       )}
+
+      <ReclamoFlow
+        open={reclamoOpen}
+        onOpenChange={setReclamoOpen}
+        papeletaNro={papeletaActual.nro}
+        onIrPagar={() => {
+          toast.info("Redirigiendo a la pasarela de pago...");
+        }}
+        onSeguimiento={() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+      />
     </div>
   );
 }
