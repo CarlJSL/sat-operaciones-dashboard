@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { CheckCircle2, CreditCard, QrCode, Loader2, ArrowRight, Download, X, Smartphone } from "lucide-react";
+import { CheckCircle2, CreditCard, QrCode, Loader2, ArrowRight, Download } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FieldDescription } from "@/components/ui/field";
+import { jsPDF } from "jspdf";
 import { toast } from "sonner";
 
 type PagoStep = 1 | 2 | 3;
@@ -49,6 +50,21 @@ function formatearFecha(): string {
   });
 }
 
+function formatearNumeroTarjeta(valor: string): string {
+  const digitos = valor.replace(/\D/g, "").slice(0, 16);
+  return digitos.replace(/(\d{4})(?=\d)/g, "$1 ");
+}
+
+function formatearFechaVenc(valor: string): string {
+  const digitos = valor.replace(/\D/g, "").slice(0, 4);
+  if (digitos.length <= 2) return digitos;
+  return `${digitos.slice(0, 2)}/${digitos.slice(2)}`;
+}
+
+function soloDigitos(valor: string): string {
+  return valor.replace(/\D/g, "").slice(0, 4);
+}
+
 export function PagoModal({
   open,
   onOpenChange,
@@ -75,11 +91,6 @@ export function PagoModal({
     setFechaPago("");
   }, []);
 
-  const handleClose = () => {
-    resetForm();
-    onOpenChange(false);
-  };
-
   const limpiarError = (campo: keyof FormErrors) => {
     if (errors[campo]) setErrors((prev) => ({ ...prev, [campo]: undefined }));
   };
@@ -98,6 +109,9 @@ export function PagoModal({
       nuevos.fechaVenc = "Ingresa la fecha de vencimiento";
     } else if (!/^\d{2}\/\d{2}$/.test(fechaVenc.trim())) {
       nuevos.fechaVenc = "Formato inválido (MM/AA)";
+    } else {
+      const mes = parseInt(fechaVenc.split("/")[0], 10);
+      if (mes > 12) nuevos.fechaVenc = "El mes no puede ser mayor a 12";
     }
 
     if (!cvv.trim()) {
@@ -120,8 +134,90 @@ export function PagoModal({
     }, 2500);
   };
 
-  const handleDescargar = () => {
-    toast.success("Constancia descargada correctamente");
+  const handleDescargarPDF = () => {
+    const doc = new jsPDF("p", "mm", "a4");
+
+    const bluePrimary = [25, 64, 103];
+    const greenSuccess = [22, 163, 74];
+    const grayText = [100, 100, 100];
+    const grayLabel = [150, 150, 150];
+    const bgCard = [248, 250, 252];
+    const drawColor = [226, 232, 240];
+
+    doc.setFillColor(bluePrimary[0], bluePrimary[1], bluePrimary[2]);
+    doc.rect(0, 0, 210, 30, "F");
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("SAT LIMA", 20, 16);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("CONSTANCIA OFICIAL DE REGULARIZACIÓN", 20, 23);
+
+    const cardY = 38;
+    const cardH = 80;
+
+    doc.setDrawColor(drawColor[0], drawColor[1], drawColor[2]);
+    doc.setFillColor(bgCard[0], bgCard[1], bgCard[2]);
+    doc.roundedRect(20, cardY, 170, cardH, 3, 3, "FD");
+
+    doc.setTextColor(bluePrimary[0], bluePrimary[1], bluePrimary[2]);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("Resumen de Operación", 28, cardY + 10);
+
+    doc.setLineWidth(0.3);
+    doc.line(28, cardY + 16, 182, cardY + 16);
+
+    let yPos = cardY + 24;
+    doc.setFontSize(10);
+
+    const drawField = (label: string, value: string, y: number, customValueColor: number[] = [0, 0, 0]) => {
+      doc.setTextColor(grayLabel[0], grayLabel[1], grayLabel[2]);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${label}:`, 28, y);
+
+      doc.setTextColor(customValueColor[0], customValueColor[1], customValueColor[2]);
+      doc.setFont("helvetica", "bold");
+      doc.text(value, 60, y);
+    };
+
+    drawField("Ciudadano", "Juan Pérez", yPos); yPos += 8;
+    drawField("Documento", "DNI 12345678", yPos); yPos += 8;
+    drawField("Operación", operacion || "OP-54910", yPos); yPos += 8;
+    drawField("Fecha de Pago", fechaPago || new Date().toLocaleDateString("es-PE"), yPos); yPos += 8;
+
+    doc.setTextColor(grayLabel[0], grayLabel[1], grayLabel[2]);
+    doc.setFont("helvetica", "normal");
+    doc.text("Papeleta:", 28, yPos);
+
+    doc.setTextColor(greenSuccess[0], greenSuccess[1], greenSuccess[2]);
+    doc.setFont("helvetica", "bold");
+    doc.text(`#${papeletaNro}`, 60, yPos);
+
+    yPos += 11;
+
+    doc.line(28, yPos - 3, 182, yPos - 3);
+
+    doc.setTextColor(bluePrimary[0], bluePrimary[1], bluePrimary[2]);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text("Total Pagado", 28, yPos + 4);
+
+    doc.setTextColor(greenSuccess[0], greenSuccess[1], greenSuccess[2]);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text(`S/ ${monto}`, 182, yPos + 6, { align: "right" });
+
+    doc.setTextColor(grayText[0], grayText[1], grayText[2]);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("Este documento certifica la regularización de la infracción de tránsito.", 105, 125, { align: "center" });
+    doc.text("Servicio de Administración Tributaria de Lima - SAT", 105, 130, { align: "center" });
+
+    doc.save(`constancia_SAT_${papeletaNro}.pdf`);
   };
 
   const handleCerrar = () => {
@@ -130,17 +226,22 @@ export function PagoModal({
     toast.success("Papeleta regularizada con éxito");
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:max-w-md overflow-x-hidden overflow-y-auto max-h-[90vh] p-6">
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 z-10 cursor-pointer rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden"
-          aria-label="Cerrar"
-        >
-          <X className="size-4" />
-        </button>
+  const bloqueado = step === 2;
 
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) resetForm();
+        onOpenChange(open);
+      }}
+    >
+      <DialogContent
+        className="w-[95vw] sm:max-w-md overflow-x-hidden overflow-y-auto max-h-[90vh] p-6"
+        showCloseButton={!bloqueado}
+        onInteractOutside={bloqueado ? (e) => e.preventDefault() : undefined}
+        onEscapeKeyDown={bloqueado ? (e) => e.preventDefault() : undefined}
+      >
         {/* ──── STEP 1: Checkout ──── */}
         {step === 1 && (
           <>
@@ -198,10 +299,7 @@ export function PagoModal({
                       </div>
                     </div>
                   </div>
-                  <div className="text-center space-y-1.5">
-                    <p className="text-xl font-black text-platform-blue">
-                      S/ {monto}
-                    </p>
+                  <div className="text-center">
                     <p className="text-sm leading-relaxed text-muted-foreground max-w-xs">
                       Abre la app de tu banco, escanea el código y confirma el
                       pago desde tu celular.
@@ -218,7 +316,7 @@ export function PagoModal({
                     placeholder="1234 5678 9012 3456"
                     value={nroTarjeta}
                     onChange={(e) => {
-                      setNroTarjeta(e.target.value);
+                      setNroTarjeta(formatearNumeroTarjeta(e.target.value));
                       limpiarError("nroTarjeta");
                     }}
                     maxLength={19}
@@ -239,7 +337,7 @@ export function PagoModal({
                       placeholder="12/28"
                       value={fechaVenc}
                       onChange={(e) => {
-                        setFechaVenc(e.target.value);
+                        setFechaVenc(formatearFechaVenc(e.target.value));
                         limpiarError("fechaVenc");
                       }}
                       maxLength={5}
@@ -259,7 +357,7 @@ export function PagoModal({
                       placeholder="123"
                       value={cvv}
                       onChange={(e) => {
-                        setCvv(e.target.value);
+                        setCvv(soloDigitos(e.target.value));
                         limpiarError("cvv");
                       }}
                       maxLength={4}
@@ -281,7 +379,7 @@ export function PagoModal({
                 onClick={handlePagar}
                 className="w-full bg-platform-blue hover:bg-platform-blue/90 py-6 h-auto text-base font-semibold gap-2"
               >
-                Pagar S/ {monto}
+                Pagar ahora
                 <ArrowRight className="size-5" />
               </Button>
             </DialogFooter>
@@ -342,7 +440,7 @@ export function PagoModal({
             <DialogFooter className="flex-col gap-2 sm:flex-row mt-2">
               <Button
                 variant="outline"
-                onClick={handleDescargar}
+                onClick={handleDescargarPDF}
                 className="w-full sm:w-auto gap-2"
               >
                 <Download className="size-4" />
