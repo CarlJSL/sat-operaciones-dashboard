@@ -1,5 +1,5 @@
 import { useState, useRef, type ChangeEvent } from "react";
-import { AlertTriangle, CheckCircle2, FileText, Upload, X, Scale } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileText, Upload, X, Scale, ShieldAlert, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -168,44 +168,55 @@ export function ReclamoFlow({
         {/* ──── STEP 0: Advertencia ──── */}
         {step === 0 && (
           <>
-            <DialogHeader className="gap-4 pt-4 sm:items-center sm:text-center">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-amber-100">
-                <AlertTriangle className="size-7 text-amber-600" aria-hidden="true" />
+            <DialogHeader className="gap-3 pt-2 sm:items-center sm:text-center">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-amber-100">
+                <AlertTriangle className="size-6 text-amber-600" aria-hidden="true" />
               </div>
-              <div className="text-balance">
-                <DialogTitle className="text-lg font-bold">
-                  {t("platform.consultation.claim.beforeTitle")}
-                </DialogTitle>
-                <DialogDescription className="mt-2 text-sm leading-relaxed text-balance">
-                  <Trans
-                    i18nKey="platform.consultation.claim.beforeDescription"
-                    values={{ days: t("platform.consultation.claim.fiveBusinessDays"), discount: "83%" }}
-                    components={{ strong: <strong /> }}
-                  />
-                </DialogDescription>
-              </div>
+              <DialogTitle className="text-base font-bold">
+                {t("platform.consultation.claim.beforeTitle")}
+              </DialogTitle>
             </DialogHeader>
 
-            <div className="rounded-lg border bg-muted/50 px-4 py-3.5">
-              <p className="text-xs leading-relaxed text-muted-foreground text-pretty">
-                <strong className="font-semibold text-amber-700">{t("platform.consultation.claim.important")}</strong>{" "}
-                {t("platform.consultation.claim.importantDescription")}
-              </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center">
+                <ShieldAlert className="size-7 mx-auto text-destructive/70" aria-hidden="true" />
+                <p className="text-xs font-semibold text-foreground mt-2">
+                  {t("platform.consultation.claim.warningClaimTitle")}
+                </p>
+                <p className="text-xl font-extrabold text-foreground mt-1">
+                  {t("platform.consultation.claim.warningClaimAmount")}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  {t("platform.consultation.claim.warningClaimText")}
+                </p>
+              </div>
+              <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center">
+                <CheckCircle2 className="size-7 mx-auto text-green-600" aria-hidden="true" />
+                <p className="text-xs font-semibold text-foreground mt-2">
+                  {t("platform.consultation.claim.warningPayTitle")}
+                </p>
+                <p className="text-2xl font-extrabold text-green-700 mt-1">
+                  {t("platform.consultation.claim.warningPayAmount")}
+                </p>
+                <p className="text-xs text-green-600 font-medium mt-1">
+                  {t("platform.consultation.claim.warningPayText")}
+                </p>
+              </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 w-full">
+            <div className="flex flex-col gap-3 w-full mt-3">
+              <Button
+                onClick={handleCancelarPagar}
+                className="px-4 py-5 h-auto text-sm font-semibold w-full bg-platform-blue hover:bg-platform-blue/90 text-wrap"
+              >
+                {t("platform.consultation.claim.payWithDiscount")}
+              </Button>
               <Button
                 variant="outline"
                 onClick={handleContinuar}
                 className="px-4 py-5 h-auto text-sm font-semibold w-full text-muted-foreground text-wrap"
               >
                 {t("platform.consultation.claim.continueClaim")}
-              </Button>
-              <Button
-                onClick={handleCancelarPagar}
-                className="px-4 py-5 h-auto text-sm font-semibold w-full bg-platform-blue hover:bg-platform-blue/90 text-wrap"
-              >
-                {t("platform.consultation.claim.payWithDiscount")}
               </Button>
             </div>
           </>
