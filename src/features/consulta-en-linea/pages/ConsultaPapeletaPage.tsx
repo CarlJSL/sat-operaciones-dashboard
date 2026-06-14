@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, Printer, ExternalLink, CheckCircle2, Clock, AlertTriangle, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,12 +12,25 @@ import {
 } from "@/components/ui/breadcrumb";
 import { cn } from "@/core/lib/utils";
 import { toast } from "sonner";
+import { useVoiceContext } from "@/features/voice/context/voiceContext";
+import { useSpeechSynthesis } from "@/features/voice/hooks/useSpeechSynthesis";
+import { normalize } from "@/features/voice/services/commandMatcher";
 
 export default function ConsultaPapeletaPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  
+
+  const { registerCommand } = useVoiceContext();
+  const { speak } = useSpeechSynthesis();
+
+  // Refs for voice-activated buttons (results state)
+  const payButtonRef = useRef<HTMLButtonElement>(null);
+  const reclamoButtonRef = useRef<HTMLButtonElement>(null);
+  const imprimirButtonRef = useRef<HTMLButtonElement>(null);
+  const descargarButtonRef = useRef<HTMLButtonElement>(null);
+  const whatsappLinkRef = useRef<HTMLAnchorElement>(null);
+
   // Mock initial data
   const [papeletaActual, setPapeletaActual] = useState({
     nro: "CP00155801",
@@ -45,9 +57,9 @@ export default function ConsultaPapeletaPage() {
     { id: 6, title: "Medidas Cautelares", desc: "Embargo o captura de vehículo", status: "upcoming", deadline: "7 días hábiles" },
   ];
 
-  const handleSearch = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!searchQuery.trim()) return;
+  /** Shared search logic — can be called from form submit or voice command. */
+  const performSearch = useCallback(async (query: string) => {
+    if (!query.trim()) return;
 
     setIsLoading(true);
 
@@ -55,9 +67,9 @@ export default function ConsultaPapeletaPage() {
     await new Promise((resolve) => setTimeout(resolve, 1200));
 
     // Simulate finding the data (or not)
-    if (searchQuery.toLowerCase().includes("a1g") || searchQuery.includes("155") || searchQuery.length > 5) {
+    if (query.toLowerCase().includes("a1g") || query.includes("155") || query.length > 5) {
       setPapeletaActual({
-        nro: searchQuery.toUpperCase().startsWith("CP") ? searchQuery.toUpperCase() : "CP" + Math.floor(Math.random() * 900000 + 100000),
+        nro: query.toUpperCase().startsWith("CP") ? query.toUpperCase() : "CP" + Math.floor(Math.random() * 900000 + 100000),
         placa: "A1G359",
         falta: "G40",
         fecha: "27/12/2025",
@@ -73,12 +85,135 @@ export default function ConsultaPapeletaPage() {
       toast.error("No se encontró la papeleta ingresada");
     }
     setIsLoading(false);
+  }, []);
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    performSearch(searchQuery);
   };
 
-  const resetSearch = () => {
+  const resetSearch = useCallback(() => {
     setHasSearched(false);
     setSearchQuery("");
-  };
+  }, []);
+
+  // Voice command registration — re-register when search state changes
+  useEffect(() => {
+    const cleanups: (() => void)[] = [];
+
+    if (!hasSearched) {
+      // ── Search state commands ──
+      // "buscar {query}", "buscar papeleta {query}", "buscar DNI {query}" → extract query and search
+      const searchAction = (transcript?: string) => {
+        if (!transcript) return;
+        const norm = normalize(transcript);
+
+        // Try longer prefixes first to avoid stripping only "buscar" from "buscar papeleta CP155801"
+        const prefixes = [
+          'buscar papeleta', 'buscar dni',
+          'consultar papeleta', 'consultar dni',
+          'buscar', 'consultar',
+        ];
+        let query = norm;
+        for (const prefix of prefixes) {
+          if (norm.startsWith(prefix + ' ')) {
+            query = norm.slice(prefix.length).trim();
+            break;
+          }
+          if (norm === prefix) {
+            // User said just "buscar" with no query — do nothing meaningful
+            query = '';
+            break;
+          }
+        }
+
+        if (query) {
+          const upperQuery = query.toUpperCase();
+          setSearchQuery(upperQuery);
+          performSearch(upperQuery);
+        }
+      };
+
+      cleanups.push(registerCommand({
+        patterns: ['buscar', 'buscar papeleta', 'buscar dni', 'consultar', 'consultar papeleta', 'consultar dni'],
+        action: searchAction,
+        scope: 'consulta-papeleta',
+      }));
+    } else {
+      // ── Results state commands ──
+
+      // Pagar con Descuento
+      cleanups.push(registerCommand({
+        patterns: ['pagar', 'pagar papeleta', 'pagar multa', 'cancelar', 'abonar'],
+        action: () => payButtonRef.current?.click(),
+        scope: 'consulta-papeleta',
+      }));
+
+      // Presentar Reclamo
+      cleanups.push(registerCommand({
+        patterns: ['reclamo', 'presentar reclamo', 'apelar', 'impugnar'],
+        action: () => reclamoButtonRef.current?.click(),
+        scope: 'consulta-papeleta',
+      }));
+
+      // Imprimir Constancia
+      cleanups.push(registerCommand({
+        patterns: ['imprimir', 'imprimir constancia'],
+        action: () => imprimirButtonRef.current?.click(),
+        scope: 'consulta-papeleta',
+      }));
+
+      // Descargar Expediente Digital
+      cleanups.push(registerCommand({
+        patterns: ['descargar', 'descargar expediente', 'bajar expediente'],
+        action: () => descargarButtonRef.current?.click(),
+        scope: 'consulta-papeleta',
+      }));
+
+      // Ayuda / WhatsApp
+      cleanups.push(registerCommand({
+        patterns: ['hablar con asesor', 'contactar asesor', 'whatsapp'],
+        action: () => whatsappLinkRef.current?.click(),
+        scope: 'consulta-papeleta',
+      }));
+
+      // Nueva búsqueda / reset
+      cleanups.push(registerCommand({
+        patterns: ['buscar otra', 'nueva búsqueda', 'consultar otra papeleta'],
+        action: () => resetSearch(),
+        scope: 'consulta-papeleta',
+      }));
+
+      // Step tracker voice descriptions
+      const stepDescriptions: Record<string, string> = {
+        'ver paso 1': 'Paso 1: Inicio — El ciudadano recibe la papeleta de infracción.',
+        'ver paso 2': 'Paso 2: Emisión de Informe — Opinión sobre la infracción, IFI.',
+        'ver paso 3': 'Paso 3: Notificación — Notificación del informe. Etapa actual.',
+        'ver paso 4': 'Paso 4: Resolución — Resolución Final de Sanción.',
+        'ver paso 5': 'Paso 5: Sanción Firme — Respuesta de apelación.',
+        'etapa inicio': 'Etapa de Inicio — El ciudadano recibe la papeleta.',
+        'etapa emisión': 'Etapa de Emisión — Opinión sobre la infracción.',
+        'etapa notificación': 'Etapa de Notificación — Notificación del informe. Etapa actual.',
+        'etapa resolución': 'Etapa de Resolución — Resolución Final de Sanción.',
+        'etapa sanción': 'Etapa de Sanción Firme — Respuesta de apelación.',
+      };
+
+      for (const [pattern, description] of Object.entries(stepDescriptions)) {
+        const desc = description;
+        cleanups.push(registerCommand({
+          patterns: [pattern],
+          action: () => {
+            speak(desc);
+          },
+          scope: 'consulta-papeleta',
+        }));
+      }
+    }
+
+    return () => {
+      cleanups.forEach(cleanup => cleanup());
+    };
+  }, [hasSearched, registerCommand, speak, performSearch, resetSearch]);
 
   return (
     <div className="min-h-screen bg-zinc-50/50">
@@ -331,10 +466,10 @@ export default function ConsultaPapeletaPage() {
                       </p>
                     </div>
                     <div className="flex flex-col gap-3 shrink-0 sm:flex-row lg:flex-col">
-                      <Button className="bg-platform-blue hover:bg-platform-blue/90 shadow-xl shadow-blue-900/10 px-10 py-7 h-auto text-lg font-black transition-all hover:-translate-y-1">
+                      <Button ref={payButtonRef} className="bg-platform-blue hover:bg-platform-blue/90 shadow-xl shadow-blue-900/10 px-10 py-7 h-auto text-lg font-black transition-all hover:-translate-y-1">
                         PAGAR AHORA <ArrowRight className="ml-3 size-6" />
                       </Button>
-                      <Button variant="outline" className="border-platform-blue text-platform-blue font-bold hover:bg-blue-50 py-7 h-auto">
+                      <Button ref={reclamoButtonRef} variant="outline" className="border-platform-blue text-platform-blue font-bold hover:bg-blue-50 py-7 h-auto">
                         Presentar Reclamo
                       </Button>
                     </div>
@@ -345,13 +480,14 @@ export default function ConsultaPapeletaPage() {
 
             {/* Action Buttons Footer */}
             <div className="flex flex-wrap justify-center gap-8 mt-10">
-              <button className="flex items-center gap-2 text-xs font-black text-zinc-400 hover:text-platform-blue uppercase tracking-widest transition-colors">
+              <button ref={imprimirButtonRef} className="flex items-center gap-2 text-xs font-black text-zinc-400 hover:text-platform-blue uppercase tracking-widest transition-colors">
                 <Printer className="size-4" /> Imprimir Constancia
               </button>
-              <button className="flex items-center gap-2 text-xs font-black text-zinc-400 hover:text-platform-blue uppercase tracking-widest transition-colors">
+              <button ref={descargarButtonRef} className="flex items-center gap-2 text-xs font-black text-zinc-400 hover:text-platform-blue uppercase tracking-widest transition-colors">
                  Expediente Digital
               </button>
               <a
+                ref={whatsappLinkRef}
                 href="https://wa.me/51999431111"
                 target="_blank"
                 rel="noopener noreferrer"
