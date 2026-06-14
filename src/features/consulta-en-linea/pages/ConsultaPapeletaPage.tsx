@@ -179,15 +179,6 @@ export default function ConsultaPapeletaPage() {
       }));
 
       cleanups.push(registerCommand({
-        patterns: ['reclamo', 'presentar reclamo', 'reclamar'],
-        action: () => {
-          speak('Abriendo formulario de reclamo');
-          reclamoButtonRef.current?.click();
-        },
-        scope: 'papeleta-results',
-      }));
-
-      cleanups.push(registerCommand({
         patterns: ['imprimir', 'imprimir constancia'],
         action: () => {
           speak('Preparando constancia para imprimir');
@@ -225,10 +216,28 @@ export default function ConsultaPapeletaPage() {
 
       // Step tracker navigation commands
       cleanups.push(registerCommand({
-        patterns: ['ver detalle', 'ver infraccion', 'ver foto'],
+        patterns: ['ver detalle', 'ver infraccion', 'ver foto', 'mostrar foto', 'evidencia'],
         action: () => {
           speak('Mostrando detalle de la infracción');
           setShowPhoto(true);
+        },
+        scope: 'papeleta-results',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['cerrar foto', 'ocultar foto', 'cerrar evidencia'],
+        action: () => {
+          setShowPhoto(false);
+          speak('Foto cerrada');
+        },
+        scope: 'papeleta-results',
+      }));
+
+      cleanups.push(registerCommand({
+        patterns: ['presentar reclamo', 'hacer reclamo', 'apelar', 'reclamar infraccion'],
+        action: () => {
+          speak('Abriendo formulario de reclamo');
+          setReclamoOpen(true);
         },
         scope: 'papeleta-results',
       }));
@@ -246,11 +255,13 @@ export default function ConsultaPapeletaPage() {
       if (!hasSearched) return;
       switch (target) {
         case 'pagar': payButtonRef.current?.click(); break;
-        case 'reclamo': reclamoButtonRef.current?.click(); break;
+        case 'reclamo': setReclamoOpen(true); break;
         case 'imprimir': imprimirButtonRef.current?.click(); break;
         case 'descargar': descargarButtonRef.current?.click(); break;
         case 'whatsapp': whatsappLinkRef.current?.click(); break;
         case 'buscar-otra': resetSearch(); break;
+        case 'show-photo': setShowPhoto(true); break;
+        case 'close-photo': setShowPhoto(false); break;
       }
     };
     window.addEventListener('voice:ai-click', handler);

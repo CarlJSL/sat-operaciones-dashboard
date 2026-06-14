@@ -27,7 +27,7 @@ const AVAILABLE_ROUTES = [
   '/login', '/usuarios', '/catalogo', '/roles',
 ];
 const AVAILABLE_ACTIONS = [
-  'pagar', 'reclamo', 'imprimir', 'descargar', 'buscar-otra', 'whatsapp',
+  'pagar', 'reclamo', 'imprimir', 'descargar', 'buscar-otra', 'whatsapp', 'show-photo', 'close-photo',
 ];
 
 const SYSTEM_PROMPT = `Eres un asistente del SAT Perú que entiende lenguaje natural de conductores peruanos.
