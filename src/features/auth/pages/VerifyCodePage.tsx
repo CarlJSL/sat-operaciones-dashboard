@@ -26,12 +26,15 @@ import {
 } from "@/components/ui/input-otp";
 import { verifyCodeSchema, type VerifyCodeFormulario } from "@/domain/auth";
 import { authService } from "@/features/auth/api/auth.service";
+import { wspService } from "@/features/auth/api/wsp.service";
 import { useSuccessStore } from "@/shared/store/successStore";
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
 import { LanguageSelector } from "@/shared/components/LanguageSelector";
 
 type VerifyCodeState = {
   correo?: string;
+  telefono?: string;
+  codigo?: string;
   flow?: "notificame";
 };
 
@@ -41,7 +44,10 @@ export default function VerifyCodePage() {
   const navigate = useNavigate();
   const state = (location.state ?? {}) as VerifyCodeState;
   const correo = state.correo ?? "correo@demo.pe";
+  const telefono = state.telefono ?? "+51999999999";
+  const codigo = state.codigo ?? "";
   const isNotificameFlow = state.flow === "notificame";
+  const verificationTarget = isNotificameFlow ? telefono : correo;
 
   const methods = useForm<VerifyCodeFormulario>({
     resolver: zodResolver(verifyCodeSchema),
@@ -71,13 +77,24 @@ export default function VerifyCodePage() {
   });
 
   const { mutate: resend, isPending: isResending } = useMutation({
-    mutationFn: () => authService.forgotPasword(correo),
+    mutationFn: () => {
+      if (isNotificameFlow) {
+        return wspService.sendMessage({
+          telefono,
+          mensaje: `Tu código de verificación para Notifícame SAT es: ${codigo}`,
+        });
+      }
+
+      return authService.forgotPasword(correo);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["auth"] });
 
       useSuccessStore.getState().show({
         title: t("platform.notify.verify.resentTitle"),
-        description: t("platform.notify.verify.resentDescription"),
+        description: isNotificameFlow
+          ? "Se ha enviado un nuevo código al teléfono registrado."
+          : t("platform.notify.verify.resentDescription"),
       });
     },
   });
@@ -85,24 +102,12 @@ export default function VerifyCodePage() {
   function handleSubmit(data: VerifyCodeFormulario) {
     if (isNotificameFlow) {
       navigate("/notificame/confirmacion", {
-        state: { correo, codigo: data.code },
+        state: { correo, telefono, codigo: data.code },
       });
       return;
     }
 
     mutate(data);
-  }
-
-  function handleResend() {
-    if (isNotificameFlow) {
-      useSuccessStore.getState().show({
-        title: t("platform.notify.verify.resentTitle"),
-        description: t("platform.notify.verify.resentDescription"),
-      });
-      return;
-    }
-
-    resend();
   }
 
   return (
@@ -114,6 +119,7 @@ export default function VerifyCodePage() {
         <div className="flex justify-end px-4 sm:px-8">
           <LanguageSelector />
         </div>
+
         <CardHeader className="items-center gap-5 px-4 text-center sm:px-8">
           <div className="flex w-full justify-center">
             <img
@@ -129,18 +135,20 @@ export default function VerifyCodePage() {
           </div>
           <div className="flex flex-col gap-2">
             <CardTitle className="text-xl font-semibold text-platform-blue sm:text-2xl">
-              {t("platform.notify.verify.title")}
+              {isNotificameFlow
+                ? "Verifica tu teléfono"
+                : t("platform.notify.verify.title")}
             </CardTitle>
             <CardDescription>
-              {t("platform.notify.verify.description")}{" "}
+              {t("platform.notify.verify.description")} {" "}
               <Badge variant="secondary" className="align-middle">
-                {correo}
+                {verificationTarget}
               </Badge>
             </CardDescription>
           </div>
           {isNotificameFlow && (
             <CardDescription>
-              {t("platform.notify.verify.notifyDescription")}
+              Este paso valida tu teléfono antes de activar las notificaciones.
             </CardDescription>
           )}
         </CardHeader>
@@ -157,14 +165,16 @@ export default function VerifyCodePage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={handleResend}
+                    onClick={() => resend()}
                     disabled={isResending}
                   >
                     <RefreshCwIcon
                       data-icon="inline-start"
                       className={isResending ? "animate-spin" : undefined}
                     />
-                    {isResending ? t("platform.notify.verify.resending") : t("platform.notify.verify.resend")}
+                    {isResending
+                      ? t("platform.notify.verify.resending")
+                      : t("platform.notify.verify.resend")}
                   </Button>
                 </div>
 
@@ -210,11 +220,17 @@ export default function VerifyCodePage() {
                 className="w-full bg-platform-blue text-platform-blue-foreground hover:bg-platform-blue/90"
                 disabled={isPending}
               >
-                {isPending && <Loader2 data-icon="inline-start" className="animate-spin" />}
-                {isPending ? t("platform.notify.verify.validating") : t("platform.notify.verify.verifyCode")}
+                {isPending && (
+                  <Loader2 data-icon="inline-start" className="animate-spin" />
+                )}
+                {isPending
+                  ? t("platform.notify.verify.validating")
+                  : t("platform.notify.verify.verifyCode")}
               </Button>
               <Button asChild variant="link" className="text-platform-blue">
-                <Link to={isNotificameFlow ? "/notificame/registro" : "/forgot-password"}>
+                <Link
+                  to={isNotificameFlow ? "/notificame/registro" : "/forgot-password"}
+                >
                   {t("platform.notify.verify.back")}
                 </Link>
               </Button>
