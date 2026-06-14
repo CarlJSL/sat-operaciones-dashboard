@@ -8,17 +8,54 @@
  * because the command matcher normalizes transcripts before matching.
  */
 export const SYNONYM_GROUPS: Record<string, string[]> = {
-  papeleta: ['papeleta', 'multa', 'infraccion'],
-  placa: ['placa', 'chapa'],
-  brevete: ['brevete', 'licencia'],
-  dni: ['dni', 'documento'],
-  consultar: ['consultar', 'ver', 'revisar', 'buscar'],
-  pagar: ['pagar', 'cancelar', 'abonar'],
-  reclamo: ['reclamo', 'apelacion', 'impugnar'],
-  volver: ['volver', 'atras', 'retroceder', 'regresar'],
-  inicio: ['inicio', 'principal', 'home', 'plataforma'],
-  salir: ['salir', 'cerrar sesion', 'logout'],
-  ayuda: ['ayuda', 'asistencia', 'soporte', 'asesor'],
+  // Documentos e infracciones
+  papeleta: ['papeleta', 'multa', 'infraccion', 'parte', 'papeletas', 'multas', 'infracciones'],
+  placa: ['placa', 'chapa', 'matricula', 'placa de rodaje'],
+  brevete: ['brevete', 'licencia', 'licencia de conducir', 'carnet'],
+  dni: ['dni', 'documento', 'cedula', 'identificacion', 'numero de documento'],
+  
+  // Acciones de búsqueda
+  consultar: ['consultar', 'ver', 'revisar', 'buscar', 'mirar', 'mostrar', 'checar', 'chequear', 'fijate', 'averiguar', 'ubicar'],
+  
+  // Acciones de pago
+  pagar: ['pagar', 'cancelar', 'abonar', 'liquidar', 'saldar', 'pagar la multa', 'ponerme al dia'],
+  
+  // Acciones de reclamo
+  reclamo: ['reclamo', 'apelacion', 'impugnar', 'queja', 'descargo', 'reclamar', 'apelar', 'quejarme', 'contradecir'],
+  
+  // Acciones de impresión
+  imprimir: ['imprimir', 'imprimir constancia', 'sacar copia', 'imprimir documento', 'constancia'],
+  
+  // Acciones de descarga
+  descargar: ['descargar', 'bajar', 'descargar expediente', 'bajar archivo', 'obtener copia'],
+  
+  // Navegación
+  volver: ['volver', 'atras', 'retroceder', 'regresar', 'devolverme', 'regresame', 'para atras'],
+  inicio: ['inicio', 'principal', 'home', 'plataforma', 'pagina principal', 'pantalla principal', 'menu', 'comienzo'],
+  
+  // Sesión
+  salir: ['salir', 'cerrar sesion', 'logout', 'desconectarme', 'irme', 'terminar'],
+  
+  // Ayuda
+  ayuda: ['ayuda', 'asistencia', 'soporte', 'asesor', 'chat', 'hablar con alguien', 'contactar', 'atencion', 'auxilio', 'orientacion'],
+  
+  // Comunicación
+  whatsapp: ['whatsapp', 'chat', 'mensaje', 'escribir', 'contactar', 'hablar', 'conversar', 'consultar al asesor', 'comunicarme'],
+  
+  // Foto / evidencia
+  foto: ['foto', 'imagen', 'evidencia', 'prueba', 'captura', 'registro fotografico', 'mostrar foto'],
+  
+  // Registro / notificaciones
+  notificame: ['notificame', 'registrarme', 'alertas', 'notificaciones', 'avisos', 'suscribirme', 'darme de alta', 'inscribirme'],
+  
+  // Búsqueda de otra papeleta
+  otra: ['otra', 'nueva busqueda', 'buscar otra', 'otra papeleta', 'nueva consulta', 'siguiente'],
+  
+  // Cerrar / detener
+  detener: ['detener', 'parar', 'stop', 'basta', 'silencio', 'callate', 'apagar', 'terminar', 'finalizar'],
+  
+  // Cerrar modales
+  cerrar: ['cerrar', 'ocultar', 'quitar', 'sacar', 'cerrar foto', 'cerrar ventana'],
 };
 
 /**

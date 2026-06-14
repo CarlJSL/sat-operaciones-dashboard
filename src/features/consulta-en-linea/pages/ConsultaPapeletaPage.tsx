@@ -23,7 +23,7 @@ export default function ConsultaPapeletaPage() {
   const { numeroDePapeleta } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { registerCommand } = useVoiceContext();
+  const { registerCommand, showGuidance } = useVoiceContext();
   const { speak } = useSpeechSynthesis();
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get('q') ?? "");
   const [isLoading, setIsLoading] = useState(false);
@@ -151,7 +151,10 @@ export default function ConsultaPapeletaPage() {
           if (query) {
             setSearchQuery(query);
             performSearch(query);
-            speak(`Buscando papeleta ${query}`);
+            speak(`Buscando DNI ${query}`);
+          } else {
+            speak('Decime tu número de DNI');
+            showGuidance('Para buscar por DNI, decí tu número.\nPor ejemplo: "buscar DNI 12345678".');
           }
         },
         scope: 'consulta-papeleta',
@@ -250,13 +253,22 @@ export default function ConsultaPapeletaPage() {
     return () => {
       cleanups.forEach(cleanup => cleanup());
     };
-  }, [hasSearched, registerCommand, speak, performSearch, resetSearch]);
+  }, [hasSearched, registerCommand, speak, performSearch, resetSearch, showGuidance]);
 
   // AI click listener
   useEffect(() => {
+    const RESULTS_ONLY = new Set(['pagar', 'reclamo', 'imprimir', 'descargar', 'show-photo', 'close-photo']);
+
     const handler = (e: Event) => {
       const { target } = (e as CustomEvent<{ target: string }>).detail;
-      if (!hasSearched) return;
+
+      // Guide user: results-only actions need a search first
+      if (!hasSearched && RESULTS_ONLY.has(target)) {
+        speak('Primero ingresa el número de tu papeleta, placa o DNI');
+        showGuidance('Para continuar, primero buscá tu papeleta.\nDecí "buscar" seguido de tu número de placa o DNI.');
+        return;
+      }
+
       switch (target) {
         case 'pagar': payButtonRef.current?.click(); break;
         case 'reclamo': setReclamoOpen(true); break;
@@ -270,7 +282,7 @@ export default function ConsultaPapeletaPage() {
     };
     window.addEventListener('voice:ai-click', handler);
     return () => window.removeEventListener('voice:ai-click', handler);
-  }, [hasSearched, resetSearch]);
+  }, [hasSearched, resetSearch, speak]);
 
   return (
     <div className="min-h-screen bg-zinc-50/50">

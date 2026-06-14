@@ -34,6 +34,7 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<VoiceState>('idle');
   const [lastTranscript, setLastTranscript] = useState<string | null>(null);
   const [commandHintVisible, setCommandHintVisible] = useState(false);
+  const [guidanceMessage, setGuidanceMessage] = useState<string | null>(null);
   const registryRef = useRef<CommandRegistry>(createRegistry());
   const lastStartRef = useRef<number>(0);
   const stateRef = useRef<VoiceState>(state);
@@ -104,8 +105,16 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
           window.open('https://wa.me/51999431111', '_blank');
           return true;
         }
-        // Other targets: dispatch custom event so ConsultaPapeletaPage can react
-        window.dispatchEvent(new CustomEvent('voice:ai-click', { detail: { target: cmd.target } }));
+        // Results-only actions: navigate to papeletas page first so the
+        // ConsultaPapeletaPage can mount, listen for the event, and guide
+        // the user if they haven't searched yet.
+        if (cmd.target === 'reclamo' || cmd.target === 'pagar' || cmd.target === 'imprimir' || cmd.target === 'descargar') {
+          navigate('/consulta-en-linea/papeletas');
+        }
+        // Wait a tick for navigation, then dispatch
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('voice:ai-click', { detail: { target: cmd.target } }));
+        }, 100);
         return true;
       }
       case 'global':
@@ -135,7 +144,10 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
         return;
       } catch {
         setState('error');
-        toast.error('Error al ejecutar el comando');
+        toast.error('Error al ejecutar', {
+          className: '!bg-red-600 !text-white !border-red-600 !text-base !font-bold !px-6 !py-4 !rounded-2xl',
+          duration: 4000,
+        });
         return;
       }
     }
@@ -152,8 +164,12 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
 
     // 3. Nothing matched — AI either unavailable or rate-limited
     setState('idle');
-    toast.info('No entendí. ¿Podrías decirlo de otra forma?', {
-      description: 'Esperá unos segundos antes de reintentar.',
+    toast('No te entendí', {
+      description: '¿Podrías decirlo de otra forma?',
+      icon: '🎙️',
+      className: '!bg-platform-blue !text-white !border-platform-blue !text-base !font-bold !px-6 !py-4 !rounded-2xl !shadow-xl',
+      descriptionClassName: '!text-blue-100 !text-sm !font-medium',
+      duration: 4000,
     });
   }, [executeAICmd]);
 
@@ -241,6 +257,12 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     setCommandHintVisible(false);
   }, []);
 
+  const showGuidance = useCallback((message: string) => {
+    setGuidanceMessage(message);
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => setGuidanceMessage(null), 5000);
+  }, []);
+
   const contextValue = {
     state,
     startListening,
@@ -252,11 +274,32 @@ export function VoiceProvider({ children }: { children: React.ReactNode }) {
     commandHintVisible,
     showCommandHint,
     hideCommandHint,
+    showGuidance,
+    guidanceMessage,
   };
 
   return (
     <VoiceContext.Provider value={contextValue}>
       {children}
+
+      {/* Guidance modal — large, branded, accessible for elderly users */}
+      {guidanceMessage && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setGuidanceMessage(null)}
+        >
+          <div
+            className="relative w-full max-w-md rounded-3xl bg-platform-blue p-8 text-white shadow-2xl animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex flex-col items-center gap-5 text-center">
+              <span className="text-5xl">🎙️</span>
+              <p className="text-xl font-black leading-snug">{guidanceMessage}</p>
+              <p className="text-sm font-medium text-blue-200">Tocá para cerrar</p>
+            </div>
+          </div>
+        </div>
+      )}
     </VoiceContext.Provider>
   );
 }

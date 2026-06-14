@@ -44,6 +44,10 @@ export interface VoiceProviderValue {
   showCommandHint: () => void;
   /** Hide the command hint overlay. */
   hideCommandHint: () => void;
+  /** Show a guidance modal with a message for the user. */
+  showGuidance: (message: string) => void;
+  /** Current guidance message, null when hidden. */
+  guidanceMessage: string | null;
 }
 
 /** Single entry in the command registry. */
