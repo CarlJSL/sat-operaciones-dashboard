@@ -101,15 +101,6 @@ export default function VerifyCodePage() {
 
   function handleSubmit(data: VerifyCodeFormulario) {
     if (isNotificameFlow) {
-      if (codigo && data.code !== codigo) {
-        methods.setError("code", {
-          type: "validate",
-          message: "El código ingresado no coincide.",
-        });
-        methods.setValue("code", "");
-        return;
-      }
-
       navigate("/notificame/confirmacion", {
         state: { correo, telefono, codigo: data.code },
       });

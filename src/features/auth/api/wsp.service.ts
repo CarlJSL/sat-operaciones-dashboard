@@ -7,6 +7,6 @@ type SendMessagePayload = {
 
 export const wspService = {
   sendMessage: async (payload: SendMessagePayload): Promise<void> => {
-    await api.post("/api/wsp/sendMessageTwilio", payload);
+    await api.post("/wsp/sendMessageTwilio", payload);
   },
 };
