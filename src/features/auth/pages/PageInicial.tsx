@@ -3,12 +3,10 @@ import { Bell, Check, FileText, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -88,16 +86,6 @@ export default function PageInicial() {
             </Link>
           </div>
         </CardContent>
-
-        <CardFooter className="justify-center px-4 pt-2 sm:px-6">
-          <Button
-            type="button"
-            size="lg"
-            className="w-full bg-platform-blue text-platform-blue-foreground hover:bg-platform-blue/90 sm:w-auto sm:px-12"
-          >
-            Continuar
-          </Button>
-        </CardFooter>
       </Card>
     </main>
   );
