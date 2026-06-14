@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import { Languages } from 'lucide-react';
+import { ChevronDown, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/core/i18n';
 import { cn } from '@/core/lib/utils';
@@ -26,15 +26,17 @@ export function LanguageSelector({ className }: LanguageSelectorProps) {
   return (
     <label
       className={cn(
-        'inline-flex items-center gap-2 rounded-full border border-platform-blue/20 bg-white px-3 py-2 text-xs font-semibold text-zinc-800 shadow-md shadow-zinc-900/5',
+        'relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-full border border-platform-blue/20 bg-white px-3 py-2 text-xs font-semibold text-zinc-800 shadow-md shadow-zinc-900/5 transition-colors hover:border-platform-blue/40 hover:bg-blue-50/40',
         className
       )}
     >
       <Languages className="size-4 text-zinc-500" aria-hidden="true" />
       <span>{t('common.language')}</span>
+      <span className="font-black text-platform-blue">{t(LANGUAGE_LABEL_KEYS[currentLanguage])}</span>
+      <ChevronDown className="size-3.5 text-zinc-500" aria-hidden="true" />
       <select
         aria-label={t('common.language')}
-        className="bg-transparent text-xs font-semibold outline-none"
+        className="absolute inset-0 cursor-pointer opacity-0"
         value={currentLanguage}
         onChange={handleChange}
       >
