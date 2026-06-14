@@ -13,6 +13,7 @@ import {
 import { cn } from "@/core/lib/utils";
 import { toast } from "sonner";
 import { ReclamoFlow } from "../components/reclamo-flow";
+import { PagoModal } from "../components/pago-modal";
 import infractionImage from "@/assets/images/image.webp";
 
 export default function ConsultaPapeletaPage() {
@@ -24,6 +25,7 @@ export default function ConsultaPapeletaPage() {
   const [showPhoto, setShowPhoto] = useState(false);
   
   const [reclamoOpen, setReclamoOpen] = useState(false);
+  const [pagoOpen, setPagoOpen] = useState(false);
 
   // Mock initial data
   const [papeletaActual, setPapeletaActual] = useState({
@@ -251,7 +253,7 @@ export default function ConsultaPapeletaPage() {
                     <div className="relative grid gap-y-16 md:grid-cols-5">
                       {pasosPAS.map((paso, idx) => (
                         <div key={paso.id} className="group relative flex flex-col items-center">
-                          {idx === 2 && (<div className="pointer-events-none absolute -top-16 left-1/2 z-0 hidden w-[450%] -translate-x-1/2 text-center md:block"><span className="rounded-full bg-green-100 px-5 py-2 text-[10px] font-black tracking-[0.3em] text-green-700 uppercase shadow-sm">PAS</span></div>)}
+                          {idx === 2 && (<div className="pointer-events-none absolute -top-16 left-1/2 z-0 hidden w-[450%] -translate-x-1/2 text-center md:block"><span className="rounded-full bg-green-100 px-5 py-2 text-[10px] font-black tracking-[0.3em] text-green-700 uppercase shadow-sm">PROCEDIMIENTO ADMINISTRATIVO SANCIONADOR (PAS)</span></div>)}
                           <div className={cn("relative z-10 flex size-14 items-center justify-center rounded-full border-4 shadow-xl transition-all duration-500", paso.status === "completed" ? "border-white bg-green-500 text-white" : paso.status === "current" ? "scale-125 border-blue-50 bg-platform-blue text-white ring-8 ring-platform-blue/5" : "border-zinc-50 bg-white text-zinc-300")}>
                             {paso.status === "completed" ? <CheckCircle2 className="size-7" /> : paso.status === "current" ? <Clock className="size-7 animate-spin-slow" /> : <span className="text-lg font-black">{idx + 1}</span>}
                           </div>
@@ -269,7 +271,7 @@ export default function ConsultaPapeletaPage() {
                     <div className="relative grid gap-y-16 md:grid-cols-2">
                       {pasosPEC.map((paso, idx) => (
                         <div key={paso.id} className="group relative flex flex-col items-center">
-                          {idx === 0 && (<div className="pointer-events-none absolute -top-16 left-full z-0 hidden w-[200%] -translate-x-1/2 text-center md:block"><span className="inline-flex rounded-full bg-orange-100 px-4 py-2 text-[10px] font-black tracking-[0.2em] whitespace-nowrap text-orange-700 uppercase shadow-sm">PEC</span></div>)}
+                          {idx === 0 && (<div className="pointer-events-none absolute -top-16 left-full z-0 hidden w-[200%] -translate-x-1/2 text-center md:block"><span className="inline-flex rounded-full bg-orange-100 px-4 py-2 text-[10px] font-black tracking-[0.2em] whitespace-nowrap text-orange-700 uppercase shadow-sm">EJECUCIÓN COACTIVA (PEC)</span></div>)}
                           <div className="z-10 flex size-14 items-center justify-center rounded-full border-4 border-zinc-50 bg-white text-zinc-300 shadow-xl"><span className="text-lg font-black">{pasosPAS.length + idx + 1}</span></div>
                           <div className="mt-8 max-w-[120px] space-y-1 text-center">
                             <h3 className="flex h-8 items-center justify-center text-xs leading-tight font-black tracking-tighter text-zinc-400 uppercase">{paso.title}</h3>
@@ -289,7 +291,10 @@ export default function ConsultaPapeletaPage() {
                       <p className="text-sm text-zinc-600 leading-relaxed font-medium">Cuentas con un plazo legal hasta el <b className="text-platform-blue px-1.5 py-0.5 bg-blue-100 rounded">18 de Junio de 2026</b> para proceder con el descargo o beneficiarte del descuento del <span className="text-green-600 font-bold italic">83%</span>.</p>
                     </div>
                     <div className="flex flex-col gap-3 shrink-0 sm:flex-row lg:flex-col">
-                      <Button className="bg-platform-blue hover:bg-platform-blue/90 shadow-xl shadow-blue-900/10 px-10 py-7 h-auto text-lg font-black transition-all hover:-translate-y-1">
+                      <Button
+                        onClick={() => setPagoOpen(true)}
+                        className="bg-platform-blue hover:bg-platform-blue/90 shadow-xl shadow-blue-900/10 px-10 py-7 h-auto text-lg font-black transition-all hover:-translate-y-1"
+                      >
                         PAGAR AHORA <ArrowRight className="ml-3 size-6" />
                       </Button>
                       <Button
@@ -299,17 +304,10 @@ export default function ConsultaPapeletaPage() {
                       >
                         Presentar Reclamo
                       </Button>
-                      <Button className="bg-platform-blue hover:bg-platform-blue/90 shadow-xl shadow-blue-900/10 px-10 py-7 h-auto text-lg font-black transition-all hover:-translate-y-1">PAGAR AHORA <ArrowRight className="ml-3 size-6" /></Button>
-                      <Button variant="outline" className="border-platform-blue text-platform-blue font-bold hover:bg-blue-50 py-7 h-auto">Reclamar</Button>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="flex flex-wrap justify-center gap-8 mt-10">
-              <button className="flex items-center gap-2 text-xs font-black text-zinc-400 hover:text-platform-blue uppercase tracking-widest transition-colors"><Printer className="size-4" /> Imprimir</button>
-              <button className="flex items-center gap-2 text-xs font-black text-zinc-400 hover:text-platform-blue uppercase tracking-widest transition-colors">Expediente</button>
-              <a href="https://wa.me/51999431111" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs font-black text-green-600 hover:text-green-700 uppercase tracking-widest transition-colors">Chat con Asesor <ExternalLink className="size-4" /></a>
             </div>
             <div className="mt-16 text-center max-w-2xl mx-auto space-y-4"><p className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.2em]">SAT 2026</p></div>
           </div>
@@ -363,11 +361,18 @@ export default function ConsultaPapeletaPage() {
         onOpenChange={setReclamoOpen}
         papeletaNro={papeletaActual.nro}
         onIrPagar={() => {
-          toast.info("Redirigiendo a la pasarela de pago...");
+          setPagoOpen(true);
         }}
         onSeguimiento={() => {
           window.scrollTo({ top: 0, behavior: "smooth" });
         }}
+      />
+
+      <PagoModal
+        open={pagoOpen}
+        onOpenChange={setPagoOpen}
+        papeletaNro={papeletaActual.nro}
+        monto={papeletaActual.deuda}
       />
     </div>
   );
