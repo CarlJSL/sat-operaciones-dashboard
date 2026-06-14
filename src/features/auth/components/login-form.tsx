@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import type { LoginContext } from "@/domain/auth";
 import { cn } from "@/core/lib/utils";
@@ -32,6 +33,7 @@ export function LoginForm({
   ...props
 }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslation();
   const {
     register,
     formState: { errors },
@@ -41,9 +43,9 @@ export function LoginForm({
     <form className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Inicia sesión en tu cuenta</h1>
+          <h1 className="text-2xl font-bold">{t("auth.login.title")}</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            Ingresa tus credenciales para continuar
+            {t("auth.login.description")}
           </p>
         </div>
 
@@ -55,12 +57,12 @@ export function LoginForm({
         )}
 
         <Field data-invalid={!!errors.correo}>
-          <FieldLabel htmlFor="correo">Correo</FieldLabel>
+          <FieldLabel htmlFor="correo">{t("auth.login.emailLabel")}</FieldLabel>
           <Input
             id="correo"
             type="email"
             autoComplete="email"
-            placeholder="correo@empresa.com"
+            placeholder={t("auth.login.emailPlaceholder")}
             aria-invalid={!!errors.correo}
             {...register("correo")}
           />
@@ -73,12 +75,12 @@ export function LoginForm({
 
         <Field data-invalid={!!errors.password}>
           <div className="flex items-center">
-            <FieldLabel htmlFor="password">Contraseña</FieldLabel>
+            <FieldLabel htmlFor="password">{t("auth.login.passwordLabel")}</FieldLabel>
             <Link
               to="/forgot-password"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
-              ¿Olvidaste tu contraseña?
+              {t("auth.login.forgotPassword")}
             </Link>
           </div>
           <InputGroup>
@@ -86,7 +88,7 @@ export function LoginForm({
               id="password"
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
-              placeholder="Ingresar contraseña"
+              placeholder={t("auth.login.passwordPlaceholder")}
               aria-invalid={!!errors.password}
               {...register("password")}
             />
@@ -96,7 +98,7 @@ export function LoginForm({
                 size="icon-xs"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={
-                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  showPassword ? t("auth.login.hidePassword") : t("auth.login.showPassword")
                 }
               >
                 {showPassword ? <EyeOff /> : <Eye />}
@@ -113,7 +115,7 @@ export function LoginForm({
         <Field>
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending && <Loader2 size={15} className="animate-spin" />}
-            {isPending ? "Ingresando..." : "Iniciar sesión"}
+            {isPending ? t("auth.login.submitting") : t("auth.login.submit")}
           </Button>
         </Field>
       </FieldGroup>

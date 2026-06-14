@@ -24,6 +24,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { cn } from "@/core/lib/utils";
+import { useTranslation, Trans } from "react-i18next";
 import type { ReclamoMotivo } from "@/domain/models/reclamo";
 import { MOTIVOS_RECLAMO } from "@/domain/models/reclamo";
 
@@ -57,6 +58,7 @@ export function ReclamoFlow({
   onIrPagar,
   onSeguimiento,
 }: ReclamoFlowProps) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<ReclamoStep>(0);
   const [motivo, setMotivo] = useState<ReclamoMotivo | "">("");
   const [descripcion, setDescripcion] = useState("");
@@ -115,11 +117,11 @@ export function ReclamoFlow({
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-    if (!motivo) newErrors.motivo = "Selecciona un motivo para el reclamo";
+    if (!motivo) newErrors.motivo = t("platform.consultation.claim.validation.reasonRequired");
     if (!descripcion.trim()) {
-      newErrors.descripcion = "Cuéntanos brevemente qué sucedió";
+      newErrors.descripcion = t("platform.consultation.claim.validation.descriptionRequired");
     } else if (descripcion.trim().length < 10) {
-      newErrors.descripcion = "Describe con un poco más de detalle (mínimo 10 caracteres)";
+      newErrors.descripcion = t("platform.consultation.claim.validation.descriptionMin");
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -158,7 +160,7 @@ export function ReclamoFlow({
         <button
           onClick={handleClose}
           className="absolute top-4 right-4 z-10 cursor-pointer rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-0"
-          aria-label="Cerrar"
+          aria-label={t("platform.consultation.claim.close")}
         >
           <X className="size-4" />
         </button>
@@ -172,21 +174,22 @@ export function ReclamoFlow({
               </div>
               <div className="text-balance">
                 <DialogTitle className="text-lg font-bold">
-                  Antes de presentar un reclamo
+                  {t("platform.consultation.claim.beforeTitle")}
                 </DialogTitle>
                 <DialogDescription className="mt-2 text-sm leading-relaxed text-balance">
-                  Al presentar un reclamo, tu plazo de{" "}
-                  <strong>5 días hábiles</strong> para
-                  acceder al <strong>descuento del 83%</strong>{" "}
-                  seguirá corriendo.
+                  <Trans
+                    i18nKey="platform.consultation.claim.beforeDescription"
+                    values={{ days: t("platform.consultation.claim.fiveBusinessDays"), discount: "83%" }}
+                    components={{ strong: <strong /> }}
+                  />
                 </DialogDescription>
               </div>
             </DialogHeader>
 
             <div className="rounded-lg border bg-muted/50 px-4 py-3.5">
               <p className="text-xs leading-relaxed text-muted-foreground text-pretty">
-                <strong className="font-semibold text-amber-700">Importante:</strong> Si el SAT no resuelve a tu favor antes de que venza el plazo,{" "}
-                <strong className="text-amber-700 font-semibold">perderás el descuento</strong> y deberás pagar el monto total de S/ 880.00.
+                <strong className="font-semibold text-amber-700">{t("platform.consultation.claim.important")}</strong>{" "}
+                {t("platform.consultation.claim.importantDescription")}
               </p>
             </div>
 
@@ -196,13 +199,13 @@ export function ReclamoFlow({
                 onClick={handleContinuar}
                 className="px-4 py-5 h-auto text-sm font-semibold w-full text-muted-foreground text-wrap"
               >
-                Entendido, continuar con el reclamo
+                {t("platform.consultation.claim.continueClaim")}
               </Button>
               <Button
                 onClick={handleCancelarPagar}
                 className="px-4 py-5 h-auto text-sm font-semibold w-full bg-platform-blue hover:bg-platform-blue/90 text-wrap"
               >
-                Quiero pagar con descuento
+                {t("platform.consultation.claim.payWithDiscount")}
               </Button>
             </div>
           </>
@@ -217,10 +220,10 @@ export function ReclamoFlow({
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-base font-semibold text-white">
-                  Presentar Reclamo
+                  {t("platform.consultation.claim.submitClaim")}
                 </h2>
                 <p className="text-xs text-blue-100">
-                  Papeleta: <span className="font-medium">{papeletaNro}</span>
+                  {t("platform.consultation.claim.ticket")} <span className="font-medium">{papeletaNro}</span>
                 </p>
               </div>
               <button
@@ -228,7 +231,7 @@ export function ReclamoFlow({
                 onClick={() => setStep(0)}
                 className="shrink-0 rounded-md px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
               >
-                ← Volver
+                {t("platform.consultation.claim.back")}
               </button>
             </div>
 
@@ -236,7 +239,7 @@ export function ReclamoFlow({
               {/* Motivo */}
               <Field data-invalid={!!errors.motivo}>
                 <FieldLabel htmlFor="motivo-reclamo">
-                  Motivo del reclamo <span className="text-destructive">*</span>
+                  {t("platform.consultation.claim.reasonLabel")} <span className="text-destructive">*</span>
                 </FieldLabel>
                 <Select
                   value={motivo || undefined}
@@ -250,16 +253,14 @@ export function ReclamoFlow({
                     className="w-full"
                     aria-invalid={!!errors.motivo}
                   >
-                    <SelectValue placeholder="Selecciona un motivo" />
+                    <SelectValue placeholder={t("platform.consultation.claim.reasonPlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.entries(MOTIVOS_RECLAMO) as [ReclamoMotivo, string][]).map(
-                      ([key, label]) => (
-                        <SelectItem key={key} value={key}>
-                          {label}
-                        </SelectItem>
-                      ),
-                    )}
+                    {(Object.keys(MOTIVOS_RECLAMO) as ReclamoMotivo[]).map((key) => (
+                      <SelectItem key={key} value={key}>
+                        {t(`platform.consultation.claim.reasons.${key}`)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 {errors.motivo && (
@@ -272,11 +273,11 @@ export function ReclamoFlow({
               {/* Descripción */}
               <Field data-invalid={!!errors.descripcion}>
                 <FieldLabel htmlFor="descripcion-reclamo">
-                  Breve descripción <span className="text-destructive">*</span>
+                  {t("platform.consultation.claim.descriptionLabel")} <span className="text-destructive">*</span>
                 </FieldLabel>
                 <Textarea
                   id="descripcion-reclamo"
-                  placeholder="Ej: El semáforo estaba en amarillo y no pude frenar a tiempo..."
+                  placeholder={t("platform.consultation.claim.descriptionPlaceholder")}
                   value={descripcion}
                   onChange={(e) => {
                     setDescripcion(e.target.value);
@@ -294,9 +295,9 @@ export function ReclamoFlow({
               {/* Evidencia */}
               <Field>
                 <FieldLabel>
-                  Adjuntar evidencia{" "}
+                  {t("platform.consultation.claim.evidenceLabel")}{" "}
                   <span className="text-muted-foreground font-normal">
-                    (opcional, máx. {MAX_ARCHIVOS} archivos)
+                    {t("platform.consultation.claim.evidenceHelp", { max: MAX_ARCHIVOS })}
                   </span>
                 </FieldLabel>
 
@@ -308,7 +309,7 @@ export function ReclamoFlow({
                   accept="image/*,.pdf"
                   onChange={handleFileChange}
                   className="hidden"
-                  aria-label="Seleccionar archivos de evidencia"
+                  aria-label={t("platform.consultation.claim.evidenceAria")}
                 />
 
                 <button
@@ -324,8 +325,8 @@ export function ReclamoFlow({
                 >
                   <Upload className="size-5" aria-hidden="true" />
                   {alLimite
-                    ? "Límite de archivos alcanzado"
-                    : "Subir archivos"}
+                    ? t("platform.consultation.claim.fileLimitReached")
+                    : t("platform.consultation.claim.uploadFiles")}
                 </button>
 
                   {archivos.length > 0 && (
@@ -346,7 +347,7 @@ export function ReclamoFlow({
                           type="button"
                           onClick={() => handleRemoveFile(index)}
                           className="shrink-0 text-muted-foreground hover:text-destructive transition-colors"
-                          aria-label={`Eliminar archivo ${file.name}`}
+                          aria-label={t("platform.consultation.claim.removeFile", { file: file.name })}
                         >
                           <X className="size-4" />
                         </button>
@@ -356,7 +357,7 @@ export function ReclamoFlow({
                 )}
 
                 <FieldDescription>
-                  Formatos: JPG, PNG, PDF. Máximo {MAX_FILE_SIZE_MB} MB por archivo.
+                  {t("platform.consultation.claim.formatsHelp", { max: MAX_FILE_SIZE_MB })}
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -367,7 +368,7 @@ export function ReclamoFlow({
                 onClick={handleClose}
                 className="w-full sm:w-auto"
               >
-                Cancelar
+                {t("platform.consultation.claim.cancel")}
               </Button>
               <Button
                 onClick={handleSubmit}
@@ -377,10 +378,10 @@ export function ReclamoFlow({
                 {isSubmitting ? (
                   <>
                     <span className="mr-2 size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Enviando...
+                    {t("platform.consultation.claim.sending")}
                   </>
                 ) : (
-                  "Enviar Reclamo"
+                  t("platform.consultation.claim.sendClaim")
                 )}
               </Button>
             </DialogFooter>
@@ -396,35 +397,32 @@ export function ReclamoFlow({
               </div>
               <div>
                 <DialogTitle className="text-lg font-bold text-green-800">
-                  ¡Reclamo presentado con éxito!
+                  {t("platform.consultation.claim.successTitle")}
                 </DialogTitle>
                 <DialogDescription className="mt-1.5 text-sm text-balance">
-                  Hemos recibido tu reclamo. Ahora puedes hacerle seguimiento en la
-                  Ruta de tu Papeleta.
+                  {t("platform.consultation.claim.successDescription")}
                 </DialogDescription>
               </div>
             </DialogHeader>
 
             <div className="rounded-xl border bg-muted/30 p-5 text-center">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Número de expediente
+                {t("platform.consultation.claim.caseNumber")}
               </p>
               <p className="mt-1 text-2xl font-bold text-platform-blue break-all">
                 {expediente}
               </p>
               <p className="mt-2 text-xs text-muted-foreground">
-                Papeleta: <span className="font-semibold">{papeletaNro}</span>
+                {t("platform.consultation.claim.ticket")} <span className="font-semibold">{papeletaNro}</span>
               </p>
             </div>
 
             <div className="flex items-start gap-3 rounded-lg bg-blue-50 px-4 py-3.5">
               <FileText className="mt-0.5 size-5 shrink-0 text-platform-blue" aria-hidden="true" />
               <div className="text-sm text-blue-800 text-balance">
-                <p className="font-medium">¿Qué sigue?</p>
+                <p className="font-medium">{t("platform.consultation.claim.nextTitle")}</p>
                 <p className="mt-1 leading-relaxed">
-                  Puedes revisar el estado de tu reclamo en la sección{" "}
-                  <strong>"Ruta de tu Papeleta"</strong>. Te notificaremos por
-                  correo y WhatsApp cuando haya una actualización.
+                  {t("platform.consultation.claim.nextDescription", { section: t("platform.consultation.trackingTitle") })}
                 </p>
               </div>
             </div>
@@ -434,7 +432,7 @@ export function ReclamoFlow({
                 onClick={handleSeguimiento}
                 className="bg-platform-blue hover:bg-platform-blue/90 px-10 py-6 h-auto text-base font-semibold w-full sm:w-auto"
               >
-                Ir a la Ruta de mi Papeleta
+                {t("platform.consultation.claim.goToTracking")}
               </Button>
             </DialogFooter>
           </>

@@ -17,10 +17,12 @@ import { NavUser } from "./nav-user";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { usuarioService } from "@/shared/services/usuario.service";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 //import logoHeroka from "@/assets/logos/logo-heroca.png";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user, isAuthenticated } = useAuthStore();
+  const { t } = useTranslation();
 
   // 1. Cargamos el menú desde el backend
   const { data: serverMenus, isLoading } = useQuery({
@@ -60,8 +62,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Mapeamos el usuario real de la store a la forma que espera el componente NavUser
   const navUserProps = {
-    name: user?.nombre || user?.username || "Usuario",
-    email: user?.rolNombre || "Rol",
+    name: user?.nombre || user?.username || t("common.user"),
+    email: user?.rolNombre || "-",
     avatar: "/avatars/default.jpg",
   };
 
@@ -76,7 +78,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Sat</span>
-                  <span className="truncate text-xs">Portal</span>
+                  <span className="truncate text-xs">{t("common.portal")}</span>
                 </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

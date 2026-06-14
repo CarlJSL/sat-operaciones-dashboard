@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { FieldDescription } from "@/components/ui/field";
 import { jsPDF } from "jspdf";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 type PagoStep = 1 | 2 | 3;
 type MetodoPago = "billetera" | "tarjeta";
@@ -41,14 +42,6 @@ function generarOperacion(): string {
   return `OP-${num}`;
 }
 
-function formatearFecha(): string {
-  const now = new Date();
-  return now.toLocaleDateString("es-PE", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
 
 function formatearNumeroTarjeta(valor: string): string {
   const digitos = valor.replace(/\D/g, "").slice(0, 16);
@@ -71,6 +64,7 @@ export function PagoModal({
   papeletaNro,
   monto,
 }: PagoModalProps) {
+  const { t, i18n } = useTranslation();
   const [step, setStep] = useState<PagoStep>(1);
   const [metodo, setMetodo] = useState<MetodoPago>("billetera");
   const [nroTarjeta, setNroTarjeta] = useState("");
@@ -100,24 +94,24 @@ export function PagoModal({
     const digitos = nroTarjeta.replace(/\s/g, "");
 
     if (!digitos) {
-      nuevos.nroTarjeta = "Ingresa el número de tarjeta";
+      nuevos.nroTarjeta = t("platform.consultation.payment.validation.cardRequired");
     } else if (!/^\d{16}$/.test(digitos)) {
-      nuevos.nroTarjeta = "Debe tener 16 dígitos";
+      nuevos.nroTarjeta = t("platform.consultation.payment.validation.cardDigits");
     }
 
     if (!fechaVenc.trim()) {
-      nuevos.fechaVenc = "Ingresa la fecha de vencimiento";
+      nuevos.fechaVenc = t("platform.consultation.payment.validation.expirationRequired");
     } else if (!/^\d{2}\/\d{2}$/.test(fechaVenc.trim())) {
-      nuevos.fechaVenc = "Formato inválido (MM/AA)";
+      nuevos.fechaVenc = t("platform.consultation.payment.validation.expirationInvalid");
     } else {
       const mes = parseInt(fechaVenc.split("/")[0], 10);
-      if (mes > 12) nuevos.fechaVenc = "El mes no puede ser mayor a 12";
+      if (mes > 12) nuevos.fechaVenc = t("platform.consultation.payment.validation.expirationMonth");
     }
 
     if (!cvv.trim()) {
-      nuevos.cvv = "Ingresa el CVV";
+      nuevos.cvv = t("platform.consultation.payment.validation.cvvRequired");
     } else if (!/^\d{3,4}$/.test(cvv.trim())) {
-      nuevos.cvv = "Debe tener 3 o 4 dígitos";
+      nuevos.cvv = t("platform.consultation.payment.validation.cvvDigits");
     }
 
     setErrors(nuevos);
@@ -129,7 +123,7 @@ export function PagoModal({
     setStep(2);
     setTimeout(() => {
       setOperacion(generarOperacion());
-      setFechaPago(formatearFecha());
+      setFechaPago(new Date().toLocaleDateString(i18n.language === "qu" ? "qu-PE" : "es-PE", { day: "numeric", month: "long", year: "numeric" }));
       setStep(3);
     }, 2500);
   };
@@ -154,7 +148,7 @@ export function PagoModal({
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text("CONSTANCIA OFICIAL DE REGULARIZACIÓN", 20, 23);
+    doc.text(t("platform.consultation.payment.pdf.officialReceipt"), 20, 23);
 
     const cardY = 38;
     const cardH = 80;
@@ -166,7 +160,7 @@ export function PagoModal({
     doc.setTextColor(bluePrimary[0], bluePrimary[1], bluePrimary[2]);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
-    doc.text("Resumen de Operación", 28, cardY + 10);
+    doc.text(t("platform.consultation.payment.pdf.operationSummary"), 28, cardY + 10);
 
     doc.setLineWidth(0.3);
     doc.line(28, cardY + 16, 182, cardY + 16);
@@ -184,14 +178,14 @@ export function PagoModal({
       doc.text(value, 60, y);
     };
 
-    drawField("Ciudadano", "Juan Pérez", yPos); yPos += 8;
-    drawField("Documento", "DNI 12345678", yPos); yPos += 8;
-    drawField("Operación", operacion || "OP-54910", yPos); yPos += 8;
-    drawField("Fecha de Pago", fechaPago || new Date().toLocaleDateString("es-PE"), yPos); yPos += 8;
+    drawField(t("platform.consultation.payment.pdf.citizen"), "Juan Pérez", yPos); yPos += 8;
+    drawField(t("platform.consultation.payment.pdf.document"), "DNI 12345678", yPos); yPos += 8;
+    drawField(t("platform.consultation.payment.pdf.operation"), operacion || "OP-54910", yPos); yPos += 8;
+    drawField(t("platform.consultation.payment.pdf.paymentDate"), fechaPago || new Date().toLocaleDateString(i18n.language === "qu" ? "qu-PE" : "es-PE"), yPos); yPos += 8;
 
     doc.setTextColor(grayLabel[0], grayLabel[1], grayLabel[2]);
     doc.setFont("helvetica", "normal");
-    doc.text("Papeleta:", 28, yPos);
+    doc.text(`${t("platform.consultation.payment.ticket")}:`, 28, yPos);
 
     doc.setTextColor(greenSuccess[0], greenSuccess[1], greenSuccess[2]);
     doc.setFont("helvetica", "bold");
@@ -204,7 +198,7 @@ export function PagoModal({
     doc.setTextColor(bluePrimary[0], bluePrimary[1], bluePrimary[2]);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    doc.text("Total Pagado", 28, yPos + 4);
+    doc.text(t("platform.consultation.payment.pdf.paidTotal"), 28, yPos + 4);
 
     doc.setTextColor(greenSuccess[0], greenSuccess[1], greenSuccess[2]);
     doc.setFont("helvetica", "bold");
@@ -214,8 +208,8 @@ export function PagoModal({
     doc.setTextColor(grayText[0], grayText[1], grayText[2]);
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
-    doc.text("Este documento certifica la regularización de la infracción de tránsito.", 105, 125, { align: "center" });
-    doc.text("Servicio de Administración Tributaria de Lima - SAT", 105, 130, { align: "center" });
+    doc.text(t("platform.consultation.payment.pdf.certificateText"), 105, 125, { align: "center" });
+    doc.text(t("platform.consultation.payment.pdf.satName"), 105, 130, { align: "center" });
 
     doc.save(`constancia_SAT_${papeletaNro}.pdf`);
   };
@@ -223,7 +217,7 @@ export function PagoModal({
   const handleCerrar = () => {
     resetForm();
     onOpenChange(false);
-    toast.success("Papeleta regularizada con éxito");
+    toast.success(t("platform.consultation.payment.regularizedSuccess"));
   };
 
   const bloqueado = step === 2;
@@ -248,7 +242,7 @@ export function PagoModal({
             <DialogHeader className="gap-3 pt-2">
               <div className="text-center">
                 <p className="text-xs text-muted-foreground">
-                  Pago de Papeleta
+                  {t("platform.consultation.payment.ticketPayment")}
                 </p>
                 <DialogTitle className="text-base font-bold text-foreground mt-0.5">
                   #{papeletaNro}
@@ -256,7 +250,7 @@ export function PagoModal({
               </div>
               <div className="mx-auto mt-1 rounded-xl bg-platform-blue/5 px-8 py-4 text-center">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Total a pagar
+                  {t("platform.consultation.payment.totalToPay")}
                 </p>
                 <p className="mt-0.5 text-3xl font-black text-platform-blue tracking-tight">
                   S/ {monto}
@@ -276,11 +270,11 @@ export function PagoModal({
               <TabsList className="w-full">
                 <TabsTrigger value="billetera" className="flex-1 gap-2">
                   <QrCode className="size-4" />
-                  Billetera Digital
+                  {t("platform.consultation.payment.digitalWallet")}
                 </TabsTrigger>
                 <TabsTrigger value="tarjeta" className="flex-1 gap-2">
                   <CreditCard className="size-4" />
-                  Tarjeta
+                  {t("platform.consultation.payment.card")}
                 </TabsTrigger>
               </TabsList>
 
@@ -301,8 +295,7 @@ export function PagoModal({
                   </div>
                   <div className="text-center">
                     <p className="text-sm leading-relaxed text-muted-foreground max-w-xs">
-                      Abre la app de tu banco, escanea el código y confirma el
-                      pago desde tu celular.
+                      {t("platform.consultation.payment.walletInstructions")}
                     </p>
                   </div>
                 </div>
@@ -310,7 +303,7 @@ export function PagoModal({
 
               <TabsContent value="tarjeta" className="mt-5 space-y-4">
                 <div>
-                  <Label htmlFor="nro-tarjeta">Número de tarjeta</Label>
+                  <Label htmlFor="nro-tarjeta">{t("platform.consultation.payment.cardNumber")}</Label>
                   <Input
                     id="nro-tarjeta"
                     placeholder="1234 5678 9012 3456"
@@ -331,7 +324,7 @@ export function PagoModal({
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="fecha-venc">MM/AA</Label>
+                    <Label htmlFor="fecha-venc">{t("platform.consultation.payment.expiration")}</Label>
                     <Input
                       id="fecha-venc"
                       placeholder="12/28"
@@ -351,7 +344,7 @@ export function PagoModal({
                     )}
                   </div>
                   <div>
-                    <Label htmlFor="cvv">CVV</Label>
+                    <Label htmlFor="cvv">{t("platform.consultation.payment.cvv")}</Label>
                     <Input
                       id="cvv"
                       placeholder="123"
@@ -379,7 +372,7 @@ export function PagoModal({
                 onClick={handlePagar}
                 className="w-full bg-platform-blue hover:bg-platform-blue/90 py-6 h-auto text-base font-semibold gap-2"
               >
-                Pagar ahora
+                {t("platform.consultation.payment.payNow")}
                 <ArrowRight className="size-5" />
               </Button>
             </DialogFooter>
@@ -392,10 +385,10 @@ export function PagoModal({
             <Loader2 className="size-12 animate-spin text-platform-blue" />
             <div className="text-center">
               <p className="text-base font-semibold text-foreground">
-                Procesando pago seguro...
+                {t("platform.consultation.payment.processingTitle")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                No cierres esta ventana
+                {t("platform.consultation.payment.processingDescription")}
               </p>
             </div>
           </div>
@@ -410,29 +403,29 @@ export function PagoModal({
               </div>
               <div>
                 <DialogTitle className="text-lg font-bold text-green-800">
-                  ¡Pago exitoso!
+                  {t("platform.consultation.payment.successTitle")}
                 </DialogTitle>
                 <p className="mt-1 text-sm text-muted-foreground text-balance">
-                  Tu papeleta ha sido regularizada.
+                  {t("platform.consultation.payment.successDescription")}
                 </p>
               </div>
             </DialogHeader>
 
             <div className="rounded-xl border bg-muted/30 p-5 space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">N° de Operación</span>
+                <span className="text-muted-foreground">{t("platform.consultation.payment.operationNumber")}</span>
                 <span className="font-bold text-foreground">{operacion}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Fecha</span>
+                <span className="text-muted-foreground">{t("platform.consultation.date")}</span>
                 <span className="font-medium text-foreground">{fechaPago}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Monto</span>
+                <span className="text-muted-foreground">{t("platform.consultation.payment.amount")}</span>
                 <span className="font-bold text-platform-blue">S/ {monto}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Papeleta</span>
+                <span className="text-muted-foreground">{t("platform.consultation.payment.ticket")}</span>
                 <span className="font-medium text-foreground">#{papeletaNro}</span>
               </div>
             </div>
@@ -444,13 +437,13 @@ export function PagoModal({
                 className="w-full sm:w-auto gap-2"
               >
                 <Download className="size-4" />
-                Descargar Constancia
+                {t("platform.consultation.payment.downloadReceipt")}
               </Button>
               <Button
                 onClick={handleCerrar}
                 className="w-full sm:w-auto bg-platform-blue hover:bg-platform-blue/90"
               >
-                Cerrar
+                {t("platform.consultation.payment.close")}
               </Button>
             </DialogFooter>
           </>

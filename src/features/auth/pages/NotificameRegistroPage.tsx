@@ -1,6 +1,8 @@
+import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Loader2, ShieldCheck } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
+import { Loader2, ShieldCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +34,7 @@ import {
 import loginImage from "@/assets/images/login-img.jpg";
 import satHeaderLogo from "@/assets/logos/logosathd2.png";
 import { wspService } from "@/features/auth/api/wsp.service";
+import { LanguageSelector } from "@/shared/components/LanguageSelector";
 
 function createVerificationCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -46,11 +49,12 @@ function formatPeruPhone(telefono: string) {
 
 export default function NotificameRegistroPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { mutate, isPending } = useMutation({
     mutationFn: wspService.sendMessage,
   });
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const correo = String(formData.get("correo") || "correo@demo.pe");
@@ -79,129 +83,151 @@ export default function NotificameRegistroPage() {
 
       <Card className="relative w-full max-w-5xl overflow-hidden border-0 bg-card/95 py-0 text-card-foreground shadow-2xl lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.85fr)] lg:gap-0">
         <div className="flex flex-col py-5 sm:py-7">
-        <CardHeader className="items-center gap-4 px-4 text-center sm:px-8">
-          <div className="flex w-full justify-center">
-            <img
-              src={satHeaderLogo}
-              alt="SAT"
-              className="h-auto w-full max-w-36 object-contain sm:max-w-44"
-            />
+          <div className="flex justify-end px-4 sm:px-8">
+            <LanguageSelector />
           </div>
-          <div className="flex flex-col gap-2">
-            <CardTitle className="text-xl font-semibold text-platform-blue sm:text-2xl">
-              Registro Notifícame
-            </CardTitle>
-            <CardDescription>
-              Registra tus datos para recibir notificaciones y alertas sobre tus
-              trámites, multas y obligaciones.
-            </CardDescription>
-          </div>
-        </CardHeader>
 
-        <CardContent className="px-4 sm:px-8">
-          <form
-            className="flex flex-col gap-5"
-            onSubmit={handleSubmit}
-          >
-            <FieldGroup className="gap-5">
-              <Field>
-                <FieldLabel htmlFor="tipo-documento">Tipo documento *</FieldLabel>
-                <Select required>
-                  <SelectTrigger id="tipo-documento" className="w-full">
-                    <SelectValue placeholder="Selecciona un tipo de documento" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="dni">DNI</SelectItem>
-                      <SelectItem value="ce">Carné de extranjería</SelectItem>
-                      <SelectItem value="ruc">RUC</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
+          <CardHeader className="items-center gap-4 px-4 text-center sm:px-8">
+            <div className="flex w-full justify-center">
+              <img
+                src={satHeaderLogo}
+                alt="SAT"
+                className="h-auto w-full max-w-36 object-contain sm:max-w-44"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <CardTitle className="text-xl font-semibold text-platform-blue sm:text-2xl">
+                {t("platform.notify.register.title")}
+              </CardTitle>
+              <CardDescription>
+                {t("platform.notify.register.description")}
+              </CardDescription>
+            </div>
+          </CardHeader>
 
-              <Field>
-                <FieldLabel htmlFor="documento">Documento *</FieldLabel>
-                <Input
-                  id="documento"
-                  inputMode="numeric"
-                  placeholder="Ingresa tu número de documento"
-                  required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="telefono">Teléfono *</FieldLabel>
-                <Input
-                  id="telefono"
-                  name="telefono"
-                  type="tel"
-                  inputMode="tel"
-                  placeholder="Ingresa tu número de teléfono"
-                  required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="correo">Correo electrónico *</FieldLabel>
-                <Input
-                  id="correo"
-                  name="correo"
-                  type="email"
-                  placeholder="correo@empresa.com"
-                  required
-                />
-              </Field>
-
-              <Field orientation="horizontal">
-                <Checkbox id="terminos" />
-                <FieldContent>
-                  <FieldLabel htmlFor="terminos">
-                    Acepto términos y condiciones *
+          <CardContent className="px-4 sm:px-8">
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+              <FieldGroup className="gap-5">
+                <Field>
+                  <FieldLabel htmlFor="tipo-documento">
+                    {t("platform.notify.register.documentType")} *
                   </FieldLabel>
-                  <FieldDescription>
-                    Autorizo el envío de notificaciones por WhatsApp y correo
-                    electrónico sobre trámites, multas y obligaciones.
-                  </FieldDescription>
-                </FieldContent>
-              </Field>
+                  <Select required>
+                    <SelectTrigger id="tipo-documento" className="w-full">
+                      <SelectValue
+                        placeholder={t(
+                          "platform.notify.register.documentTypePlaceholder"
+                        )}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="dni">DNI</SelectItem>
+                        <SelectItem value="ce">
+                          {t("platform.notify.register.foreignerCard")}
+                        </SelectItem>
+                        <SelectItem value="ruc">RUC</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
 
-              <Field>
-                <div className="flex items-center gap-3 rounded-md border bg-background p-4">
-                  <Checkbox id="recaptcha-mock" />
+                <Field>
+                  <FieldLabel htmlFor="documento">
+                    {t("platform.notify.register.document")} *
+                  </FieldLabel>
+                  <Input
+                    id="documento"
+                    inputMode="numeric"
+                    placeholder={t("platform.notify.register.documentPlaceholder")}
+                    required
+                  />
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="telefono">
+                    {t("platform.notify.register.phone")} *
+                  </FieldLabel>
+                  <Input
+                    id="telefono"
+                    name="telefono"
+                    type="tel"
+                    inputMode="tel"
+                    placeholder={t("platform.notify.register.phonePlaceholder")}
+                    required
+                  />
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="correo">
+                    {t("platform.notify.register.email")} *
+                  </FieldLabel>
+                  <Input
+                    id="correo"
+                    name="correo"
+                    type="email"
+                    placeholder="correo@empresa.com"
+                    required
+                  />
+                </Field>
+
+                <Field orientation="horizontal">
+                  <Checkbox id="terminos" required />
                   <FieldContent>
-                    <FieldTitle>No soy un robot</FieldTitle>
+                    <FieldLabel htmlFor="terminos">
+                      {t("platform.notify.register.terms")} *
+                    </FieldLabel>
                     <FieldDescription>
+                      {t("platform.notify.register.authorization")}
                     </FieldDescription>
                   </FieldContent>
-                  <ShieldCheck className="ml-auto text-platform-blue" aria-hidden="true" />
-                </div>
-              </Field>
-            </FieldGroup>
+                </Field>
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full bg-platform-blue text-platform-blue-foreground hover:bg-platform-blue/90"
-              disabled={isPending}
-            >
-              {isPending && <Loader2 data-icon="inline-start" className="animate-spin" />}
-              {isPending ? "Enviando código..." : "Registrar"}
+                <Field>
+                  <div className="flex items-center gap-3 rounded-md border bg-background p-4">
+                    <Checkbox id="recaptcha-mock" required />
+                    <FieldContent>
+                      <FieldTitle>
+                        {t("platform.notify.register.notRobot")} *
+                      </FieldTitle>
+                    </FieldContent>
+                    <ShieldCheck
+                      className="ml-auto text-platform-blue"
+                      aria-hidden="true"
+                    />
+                  </div>
+                </Field>
+              </FieldGroup>
+
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full bg-platform-blue text-platform-blue-foreground hover:bg-platform-blue/90"
+                disabled={isPending}
+              >
+                {isPending && (
+                  <Loader2 data-icon="inline-start" className="animate-spin" />
+                )}
+                {isPending
+                  ? "Enviando código..."
+                  : t("platform.notify.register.submit")}
+              </Button>
+            </form>
+          </CardContent>
+
+          <CardFooter className="justify-center px-4 sm:px-8">
+            <Button asChild variant="link" className="text-platform-blue">
+              <Link to="/inicio">
+                {t("platform.notify.register.backToPlatform")}
+              </Link>
             </Button>
-          </form>
-        </CardContent>
-
-        <CardFooter className="justify-center px-4 sm:px-8">
-          <Button asChild variant="link" className="text-platform-blue">
-            <Link to="/inicio">Volver a selección de plataforma</Link>
-          </Button>
-        </CardFooter>
+          </CardFooter>
         </div>
 
         <div className="relative hidden min-h-full bg-muted lg:block">
           <img
             src={loginImage}
-            alt="Persona recibiendo notificaciones digitales"
+            alt={t("platform.notify.register.imageAlt")}
             className="absolute inset-0 h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-platform-blue/20" />

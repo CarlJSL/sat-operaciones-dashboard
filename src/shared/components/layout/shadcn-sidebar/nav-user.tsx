@@ -18,6 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { queryClient } from "@/app/providers/QueryProvider";
+import { useTranslation } from "react-i18next";
 
 export function NavUser({
   user,
@@ -31,6 +32,7 @@ export function NavUser({
   const { isMobile } = useSidebar();
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     clearAuth();
@@ -75,7 +77,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="text-destructive">
               <LogOut />
-              Cerrar sesión
+              {t("layout.header.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
