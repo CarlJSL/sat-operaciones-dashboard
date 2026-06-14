@@ -27,14 +27,14 @@ export default function PageInicial() {
 
     // "consulta en línea" / "consultar" / "ver papeletas" → navigate to consultation
     cleanups.push(registerCommand({
-      patterns: ['consulta en linea', 'consultar', 'ver papeletas'],
+      patterns: ['consulta en linea', 'consultar', 'ver papeletas', 'internetpi tapukuy', 'tapukuy', 'papeletakuna qaway'],
       action: () => navigate('/consulta-en-linea'),
       scope: 'page-inicial',
     }));
 
     // "notifícame" / "registrarme" / "alertas" → navigate to Notifícame registration
     cleanups.push(registerCommand({
-      patterns: ['notificame', 'registrarme', 'alertas'],
+      patterns: ['notificame', 'registrarme', 'alertas', 'willaway', 'qillqakuy', 'willakuykuna'],
       action: () => navigate('/notificame/registro'),
       scope: 'page-inicial',
     }));
