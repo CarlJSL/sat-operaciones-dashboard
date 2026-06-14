@@ -29,21 +29,21 @@ export default function ConsultaEnLineaOptionsPage() {
 
     // "papeletas" / "consultar por DNI" / "ver mis papeletas" → navigate to papeletas
     cleanups.push(registerCommand({
-      patterns: ['papeletas', 'consultar por dni', 'ver mis papeletas'],
+      patterns: ['papeletas', 'consultar por dni', 'ver mis papeletas', 'papeletakuna', 'dniwan tapukuy', 'papeletaykunata qaway'],
       action: () => navigate('/consulta-en-linea/papeletas'),
       scope: 'consulta-opciones',
     }));
 
     // "chatbot" / "whatsapp" / "hablar con asesor" → open WhatsApp link
     cleanups.push(registerCommand({
-      patterns: ['chatbot', 'whatsapp', 'hablar con asesor'],
+      patterns: ['chatbot', 'whatsapp', 'hablar con asesor', 'yanapaq', 'yanapawan rimay', 'whatsappwan rimay'],
       action: () => window.open(WHATSAPP_URL, '_blank', 'noopener,noreferrer'),
       scope: 'consulta-opciones',
     }));
 
     // "volver" / "inicio" → navigate to home (already a global command, but this is page-specific)
     cleanups.push(registerCommand({
-      patterns: ['volver al inicio'],
+      patterns: ['volver al inicio', 'qallariyman kutiy', 'inicio kutiy'],
       action: () => navigate('/inicio'),
       scope: 'consulta-opciones',
     }));

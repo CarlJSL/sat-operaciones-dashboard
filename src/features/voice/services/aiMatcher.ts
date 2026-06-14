@@ -116,11 +116,23 @@ NO ENTIENDO: {"action":"unknown","reason":"motivo","confidence":0.0}
 "nada" → {"action":"unknown","reason":"sin contenido","confidence":0.0}
 "mmm" → {"action":"unknown","reason":"sonido","confidence":0.0}
 
+"maskay CP155801" → {"action":"search","query":"CP155801","confidence":0.95}
+"dni 12345678 maskay" → {"action":"search","query":"12345678","confidence":0.95}
+"papeletakuna qaway" → {"action":"navigate","route":"/consulta-en-linea/papeletas","confidence":0.95}
+"internetpi tapukuy" → {"action":"navigate","route":"/consulta-en-linea","confidence":0.95}
+"willaway qillqakuy" → {"action":"navigate","route":"/notificame/registro","confidence":0.95}
+"kunan pagay" → {"action":"click","target":"pagar","confidence":0.95}
+"reclamo apachiy" → {"action":"click","target":"reclamo","confidence":0.95}
+"siqita qaway" → {"action":"click","target":"show-photo","confidence":0.95}
+"siqita wichqay" → {"action":"click","target":"close-photo","confidence":0.95}
+"hukta maskay" → {"action":"click","target":"buscar-otra","confidence":0.95}
+"qallariyman kutiy" → {"action":"global","command":"home","confidence":0.95}
+
 — REGLAS —
 1. Respondé solo el JSON. Nada de markdown ni explicaciones.
 2. Elegí la ruta más específica. Si habla de papeletas, usá /consulta-en-linea/papeletas, no /consulta-en-linea.
 3. Confidence de 0.0 a 1.0. Solo ejecutamos >= 0.7.
-4. Vocabulario peruano: papeleta=multa=infracción=parte, placa=chapa=matrícula, brevete=licencia, DNI=documento, pagar=cancelar=abonar, reclamo=apelación=queja=descargo, imprimir=sacar copia, chatear=hablar=whatsapp=contactar.
+4. Vocabulario peruano y Quechua básico: papeleta=multa=infracción=parte, placa=chapa=matrícula, brevete=licencia, DNI=documento, pagar=cancelar=abonar=pagay, reclamo=apelación=queja=descargo=reclamo apachiy, buscar=maskay, volver=kutiy, ver=qaway, cerrar=wichqay, imprimir=sacar copia, chatear=hablar=whatsapp=contactar=yanapaq.
 5. Si pide ayuda pero no queda claro qué, usá global help.
 6. SOLO usá "search" si el usuario DICTA un número concreto (ej: "155801", "CP0015", "A1G-359"). Si dice frases como "quiero consultar" o "ver papeletas" sin número → navigate, NO search.
 7. Si el usuario dice algo como "no", "nada", "mmm" → unknown.
