@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, CheckCircle2, Clock, AlertTriangle, ArrowRight, Loader2, ArrowLeft, Eye, X } from "lucide-react";
+import { Search, CheckCircle2, Clock, AlertTriangle, ArrowRight, Loader2, ArrowLeft, Eye, X, SearchX, Camera } from "lucide-react";
 import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { cn } from "@/core/lib/utils";
 import { toast } from "sonner";
 import { ReclamoFlow } from "../components/reclamo-flow";
 import { PagoModal } from "../components/pago-modal";
+import { RegistroPapeletaModal } from "../components/registro-papeleta-modal";
 import { useVoiceContext } from "@/features/voice/context/voiceContext";
 import { useSpeechSynthesis } from "@/features/voice/hooks/useSpeechSynthesis";
 import { normalize } from "@/features/voice/services/commandMatcher";
@@ -32,9 +33,11 @@ export default function ConsultaPapeletaPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [showPhoto, setShowPhoto] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   
   const [reclamoOpen, setReclamoOpen] = useState(false);
   const [pagoOpen, setPagoOpen] = useState(false);
+  const [registroOpen, setRegistroOpen] = useState(false);
 
   const payButtonRef = useRef<HTMLButtonElement>(null);
   const reclamoButtonRef = useRef<HTMLButtonElement>(null);
@@ -116,14 +119,13 @@ export default function ConsultaPapeletaPage() {
     if (!query.trim()) return;
 
     setIsLoading(true);
-    // Simular retraso de API
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    // Lógica de búsqueda (mock)
-    if (query.toLowerCase().includes("a1g") || query.includes("155") || query.length > 5) {
-      const nroNormalizado = query.toUpperCase().startsWith("CP") ? query.toUpperCase() : "CP" + query;
+    setNotFound(false);
+
+    if (query.trim().toUpperCase() === "CP155801") {
       setPapeletaActual({
-        nro: nroNormalizado,
+        nro: "CP155801",
         placa: "A1G359",
         falta: "G40",
         descripcionFalta: "Circular a una velocidad superior a la máxima permitida, según la señalización o la que establece el Reglamento.",
@@ -135,13 +137,12 @@ export default function ConsultaPapeletaPage() {
         etapaActual: 2
       });
       setHasSearched(true);
-      toast.success(t("platform.consultation.searchSuccess"));
     } else {
-      toast.error(t("platform.consultation.searchNotFound"));
+      setNotFound(true);
       setHasSearched(false);
     }
     setIsLoading(false);
-  }, [t]);
+  }, []);
 
   // Sync URL route param to state
   useEffect(() => {
@@ -151,6 +152,7 @@ export default function ConsultaPapeletaPage() {
       performSearch(numeroDePapeleta);
     } else {
       setHasSearched(false);
+      setNotFound(false);
       setSearchQuery("");
     }
   }, [numeroDePapeleta, performSearch]);
@@ -164,6 +166,7 @@ export default function ConsultaPapeletaPage() {
 
   const resetSearch = useCallback(() => {
     setHasSearched(false);
+    setNotFound(false);
     setSearchQuery("");
     setShowPhoto(false);
     setReclamoOpen(false);
@@ -404,7 +407,10 @@ export default function ConsultaPapeletaPage() {
                     <input 
                       type="text"
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        if (notFound) setNotFound(false);
+                      }}
                       placeholder={t("platform.consultation.ticketInputPlaceholder")}
                       className="w-full bg-transparent border-0 h-14 md:h-20 pl-12 md:pl-16 pr-4 text-lg md:text-2xl font-bold text-white placeholder:text-white/30 focus:ring-0 outline-none uppercase"
                       disabled={isLoading}
@@ -429,6 +435,28 @@ export default function ConsultaPapeletaPage() {
                 </p>
               </div>
             </form>
+
+            {notFound && (
+              <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-6 mt-6">
+                <SearchX className="size-10 text-slate-400" />
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-slate-700">
+                    {t("platform.consultation.notFoundTitle")}
+                  </p>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {t("platform.consultation.notFoundDescription")}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => setRegistroOpen(true)}
+                  className="border-platform-blue text-platform-blue hover:bg-blue-50 mt-2"
+                >
+                  <Camera className="mr-2 size-4" />
+                  {t("platform.consultation.registerWithPhoto")}
+                </Button>
+              </div>
+            )}
           </div>
           <div className="absolute bottom-8 text-center opacity-40">
              <p className="text-[10px] font-black uppercase tracking-[0.3em]">{t("platform.consultation.satFooter")}</p>
@@ -638,6 +666,26 @@ export default function ConsultaPapeletaPage() {
         onOpenChange={setPagoOpen}
         papeletaNro={papeletaActual.nro}
         monto={papeletaActual.deuda}
+      />
+
+      <RegistroPapeletaModal
+        open={registroOpen}
+        onOpenChange={setRegistroOpen}
+        onRegistroSuccess={() => {
+          setPapeletaActual({
+            nro: "CP155801",
+            placa: "A1G359",
+            falta: "G40",
+            descripcionFalta: "Circular a una velocidad superior a la máxima permitida, según la señalización o la que establece el Reglamento.",
+            fecha: "27/12/2025",
+            importe: "880.00",
+            descuento: "730.40",
+            deuda: "149.60",
+            estado: "En Proceso",
+            etapaActual: 2,
+          });
+          setHasSearched(true);
+        }}
       />
     </div>
   );
