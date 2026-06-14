@@ -9,7 +9,7 @@ export * from './empresa';
 export * from './config/pagination';
 export * from './config/response';
 export * from './usuario';
-
+export * from './reclamo';
 
 // Auth — fuente canónica: @/domain/auth
 export * from '@/domain/auth';

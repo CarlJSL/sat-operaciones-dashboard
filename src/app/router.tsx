@@ -61,6 +61,7 @@ export function AppRouter() {
           {/* Consulta en Línea */}
           <Route path="/consulta-en-linea" element={<ConsultaEnLineaOptionsPage />} />
           <Route path="/consulta-en-linea/papeletas" element={<ConsultaPapeletaPage />} />
+          <Route path="/consulta-en-linea/papeletas/:numeroDePapeleta" element={<ConsultaPapeletaPage />} />
 
           {/*
            * Rutas protegidas — patrón de nested routes (react-router v7):
