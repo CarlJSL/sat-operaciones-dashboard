@@ -1,5 +1,11 @@
 import { useState, useRef, type ChangeEvent } from "react";
-import { Camera, CheckCircle2, Upload, Loader2, ArrowRight } from "lucide-react";
+import {
+  Camera,
+  CheckCircle2,
+  Upload,
+  Loader2,
+  ArrowRight,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +51,16 @@ export function RegistroPapeletaModal({
   const [errores, setErrores] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const limpiarError = (campo: string) => {
+    if (errores[campo]) {
+      setErrores((prev) => {
+        const nuevos = { ...prev };
+        delete nuevos[campo];
+        return nuevos;
+      });
+    }
+  };
+
   const resetForm = () => {
     setSubmitted(false);
     setIsSubmitting(false);
@@ -55,27 +71,30 @@ export function RegistroPapeletaModal({
     setErrores({});
   };
 
-  const limpiarError = (campo: string) => {
-    if (errores[campo]) setErrores((prev) => ({ ...prev, [campo]: undefined }));
-  };
-
   const validar = (): boolean => {
     const nuevos: Record<string, string> = {};
 
-    if (!nroPapeleta.trim()) nuevos.nroPapeleta = t("platform.consultation.earlyRegistration.validation.ticketRequired");
-    else if (nroPapeleta.trim().length < 6) nuevos.nroPapeleta = t("platform.consultation.earlyRegistration.validation.ticketMinLength");
+    if (!nroPapeleta.trim())
+      nuevos.nroPapeleta = t(
+        "platform.consultation.earlyRegistration.validation.ticketRequired",
+      );
+    else if (nroPapeleta.trim().length < 6)
+      nuevos.nroPapeleta = t(
+        "platform.consultation.earlyRegistration.validation.ticketMinLength",
+      );
 
-    if (!placa.trim()) nuevos.placa = t("platform.consultation.earlyRegistration.validation.plateRequired");
+    if (!placa.trim())
+      nuevos.placa = t(
+        "platform.consultation.earlyRegistration.validation.plateRequired",
+      );
 
-    if (!infraccion) nuevos.infraccion = t("platform.consultation.earlyRegistration.validation.infractionRequired");
+    if (!infraccion)
+      nuevos.infraccion = t(
+        "platform.consultation.earlyRegistration.validation.infractionRequired",
+      );
 
     setErrores(nuevos);
     return Object.keys(nuevos).length === 0;
-  };
-
-  const handleClose = () => {
-    resetForm();
-    onOpenChange(false);
   };
 
   const handleSubmit = async () => {
@@ -113,7 +132,10 @@ export function RegistroPapeletaModal({
         {submitted ? (
           <div className="flex flex-col items-center pt-6 pb-2">
             <div className="flex size-14 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle2 className="size-7 text-green-600" aria-hidden="true" />
+              <CheckCircle2
+                className="size-7 text-green-600"
+                aria-hidden="true"
+              />
             </div>
             <h2 className="text-xl font-bold text-green-800 mt-4 mb-6 text-center">
               {t("platform.consultation.earlyRegistration.successTitle")}
@@ -145,7 +167,9 @@ export function RegistroPapeletaModal({
                     <span className="text-destructive">*</span>
                   </FieldLabel>
                   <Input
-                    placeholder={t("platform.consultation.earlyRegistration.ticketPlaceholder")}
+                    placeholder={t(
+                      "platform.consultation.earlyRegistration.ticketPlaceholder",
+                    )}
                     value={nroPapeleta}
                     onChange={(e) => {
                       setNroPapeleta(e.target.value);
@@ -166,7 +190,9 @@ export function RegistroPapeletaModal({
                     <span className="text-destructive">*</span>
                   </FieldLabel>
                   <Input
-                    placeholder={t("platform.consultation.earlyRegistration.platePlaceholder")}
+                    placeholder={t(
+                      "platform.consultation.earlyRegistration.platePlaceholder",
+                    )}
                     value={placa}
                     onChange={(e) => {
                       setPlaca(e.target.value);
@@ -188,19 +214,33 @@ export function RegistroPapeletaModal({
                   {t("platform.consultation.earlyRegistration.infractionCode")}{" "}
                   <span className="text-destructive">*</span>
                 </FieldLabel>
-                <Select value={infraccion} onValueChange={(val) => {
-                  setInfraccion(val);
-                  limpiarError("infraccion");
-                }}>
-                  <SelectTrigger className="w-full mt-1.5" aria-invalid={!!errores.infraccion}>
-                    <SelectValue placeholder={t("platform.consultation.earlyRegistration.infractionPlaceholder")} />
+                <Select
+                  value={infraccion}
+                  onValueChange={(val) => {
+                    setInfraccion(val);
+                    limpiarError("infraccion");
+                  }}
+                >
+                  <SelectTrigger
+                    className="w-full mt-1.5"
+                    aria-invalid={!!errores.infraccion}
+                  >
+                    <SelectValue
+                      placeholder={t(
+                        "platform.consultation.earlyRegistration.infractionPlaceholder",
+                      )}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {(["M20", "G47", "M17", "G57", "G01", "L01"] as const).map((key) => (
-                      <SelectItem key={key} value={key}>
-                        {t(`platform.consultation.earlyRegistration.infractions.${key}`)}
-                      </SelectItem>
-                    ))}
+                    {(["M20", "G47", "M17", "G57", "G01", "L01"] as const).map(
+                      (key) => (
+                        <SelectItem key={key} value={key}>
+                          {t(
+                            `platform.consultation.earlyRegistration.infractions.${key}`,
+                          )}
+                        </SelectItem>
+                      ),
+                    )}
                   </SelectContent>
                 </Select>
                 {errores.infraccion && (
@@ -226,12 +266,20 @@ export function RegistroPapeletaModal({
                 >
                   {archivo ? (
                     <>
-                      <Upload className="size-6 text-platform-blue" aria-hidden="true" />
-                      <span className="font-medium text-foreground">{archivo.name}</span>
+                      <Upload
+                        className="size-6 text-platform-blue"
+                        aria-hidden="true"
+                      />
+                      <span className="font-medium text-foreground">
+                        {archivo.name}
+                      </span>
                     </>
                   ) : (
                     <>
-                      <Camera className="size-8 text-platform-blue" aria-hidden="true" />
+                      <Camera
+                        className="size-8 text-platform-blue"
+                        aria-hidden="true"
+                      />
                       <span className="text-sm font-medium text-platform-blue/80">
                         {t("platform.consultation.earlyRegistration.photoArea")}
                       </span>
