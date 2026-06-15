@@ -48,6 +48,7 @@ export function AppRouter() {
       <VoiceProvider>
         <Suspense fallback={<PageLoader />}>
           <Routes>
+          <Route path="/" element={<Navigate to="/inicio" replace />} />
           {/* Rutas públicas */}
           <Route path="/inicio" element={<PageInicial />} />
           <Route path="/notificame/registro" element={<NotificameRegistroPage />} />

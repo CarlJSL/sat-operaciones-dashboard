@@ -1,5 +1,13 @@
 import { useState, useRef, type ChangeEvent } from "react";
-import { AlertTriangle, CheckCircle2, FileText, Upload, X, Scale, ShieldAlert, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  FileText,
+  Upload,
+  X,
+  Scale,
+  ShieldAlert,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +32,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { cn } from "@/core/lib/utils";
-import { useTranslation, Trans } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import type { ReclamoMotivo } from "@/domain/models/reclamo";
 import { MOTIVOS_RECLAMO } from "@/domain/models/reclamo";
 
@@ -117,11 +125,18 @@ export function ReclamoFlow({
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-    if (!motivo) newErrors.motivo = t("platform.consultation.claim.validation.reasonRequired");
+    if (!motivo)
+      newErrors.motivo = t(
+        "platform.consultation.claim.validation.reasonRequired",
+      );
     if (!descripcion.trim()) {
-      newErrors.descripcion = t("platform.consultation.claim.validation.descriptionRequired");
+      newErrors.descripcion = t(
+        "platform.consultation.claim.validation.descriptionRequired",
+      );
     } else if (descripcion.trim().length < 10) {
-      newErrors.descripcion = t("platform.consultation.claim.validation.descriptionMin");
+      newErrors.descripcion = t(
+        "platform.consultation.claim.validation.descriptionMin",
+      );
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -170,7 +185,10 @@ export function ReclamoFlow({
           <>
             <DialogHeader className="gap-3 pt-2 sm:items-center sm:text-center">
               <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-amber-100">
-                <AlertTriangle className="size-6 text-amber-600" aria-hidden="true" />
+                <AlertTriangle
+                  className="size-6 text-amber-600"
+                  aria-hidden="true"
+                />
               </div>
               <DialogTitle className="text-base font-bold">
                 {t("platform.consultation.claim.beforeTitle")}
@@ -179,7 +197,10 @@ export function ReclamoFlow({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
               <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center">
-                <ShieldAlert className="size-7 mx-auto text-destructive/70" aria-hidden="true" />
+                <ShieldAlert
+                  className="size-7 mx-auto text-destructive/70"
+                  aria-hidden="true"
+                />
                 <p className="text-xs font-semibold text-foreground mt-2">
                   {t("platform.consultation.claim.warningClaimTitle")}
                 </p>
@@ -191,7 +212,10 @@ export function ReclamoFlow({
                 </p>
               </div>
               <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center">
-                <CheckCircle2 className="size-7 mx-auto text-green-600" aria-hidden="true" />
+                <CheckCircle2
+                  className="size-7 mx-auto text-green-600"
+                  aria-hidden="true"
+                />
                 <p className="text-xs font-semibold text-foreground mt-2">
                   {t("platform.consultation.claim.warningPayTitle")}
                 </p>
@@ -234,7 +258,8 @@ export function ReclamoFlow({
                   {t("platform.consultation.claim.submitClaim")}
                 </h2>
                 <p className="text-xs text-blue-100">
-                  {t("platform.consultation.claim.ticket")} <span className="font-medium">{papeletaNro}</span>
+                  {t("platform.consultation.claim.ticket")}{" "}
+                  <span className="font-medium">{papeletaNro}</span>
                 </p>
               </div>
               <button
@@ -250,13 +275,15 @@ export function ReclamoFlow({
               {/* Motivo */}
               <Field data-invalid={!!errors.motivo}>
                 <FieldLabel htmlFor="motivo-reclamo">
-                  {t("platform.consultation.claim.reasonLabel")} <span className="text-destructive">*</span>
+                  {t("platform.consultation.claim.reasonLabel")}{" "}
+                  <span className="text-destructive">*</span>
                 </FieldLabel>
                 <Select
                   value={motivo || undefined}
                   onValueChange={(val) => {
                     setMotivo(val as ReclamoMotivo);
-                    if (errors.motivo) setErrors((prev) => ({ ...prev, motivo: undefined }));
+                    if (errors.motivo)
+                      setErrors((prev) => ({ ...prev, motivo: undefined }));
                   }}
                 >
                   <SelectTrigger
@@ -264,14 +291,20 @@ export function ReclamoFlow({
                     className="w-full"
                     aria-invalid={!!errors.motivo}
                   >
-                    <SelectValue placeholder={t("platform.consultation.claim.reasonPlaceholder")} />
+                    <SelectValue
+                      placeholder={t(
+                        "platform.consultation.claim.reasonPlaceholder",
+                      )}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {(Object.keys(MOTIVOS_RECLAMO) as ReclamoMotivo[]).map((key) => (
-                      <SelectItem key={key} value={key}>
-                        {t(`platform.consultation.claim.reasons.${key}`)}
-                      </SelectItem>
-                    ))}
+                    {(Object.keys(MOTIVOS_RECLAMO) as ReclamoMotivo[]).map(
+                      (key) => (
+                        <SelectItem key={key} value={key}>
+                          {t(`platform.consultation.claim.reasons.${key}`)}
+                        </SelectItem>
+                      ),
+                    )}
                   </SelectContent>
                 </Select>
                 {errors.motivo && (
@@ -284,15 +317,22 @@ export function ReclamoFlow({
               {/* Descripción */}
               <Field data-invalid={!!errors.descripcion}>
                 <FieldLabel htmlFor="descripcion-reclamo">
-                  {t("platform.consultation.claim.descriptionLabel")} <span className="text-destructive">*</span>
+                  {t("platform.consultation.claim.descriptionLabel")}{" "}
+                  <span className="text-destructive">*</span>
                 </FieldLabel>
                 <Textarea
                   id="descripcion-reclamo"
-                  placeholder={t("platform.consultation.claim.descriptionPlaceholder")}
+                  placeholder={t(
+                    "platform.consultation.claim.descriptionPlaceholder",
+                  )}
                   value={descripcion}
                   onChange={(e) => {
                     setDescripcion(e.target.value);
-                    if (errors.descripcion) setErrors((prev) => ({ ...prev, descripcion: undefined }));
+                    if (errors.descripcion)
+                      setErrors((prev) => ({
+                        ...prev,
+                        descripcion: undefined,
+                      }));
                   }}
                   aria-invalid={!!errors.descripcion}
                 />
@@ -308,7 +348,9 @@ export function ReclamoFlow({
                 <FieldLabel>
                   {t("platform.consultation.claim.evidenceLabel")}{" "}
                   <span className="text-muted-foreground font-normal">
-                    {t("platform.consultation.claim.evidenceHelp", { max: MAX_ARCHIVOS })}
+                    {t("platform.consultation.claim.evidenceHelp", {
+                      max: MAX_ARCHIVOS,
+                    })}
                   </span>
                 </FieldLabel>
 
@@ -340,14 +382,17 @@ export function ReclamoFlow({
                     : t("platform.consultation.claim.uploadFiles")}
                 </button>
 
-                  {archivos.length > 0 && (
+                {archivos.length > 0 && (
                   <ul className="mt-2 flex flex-col gap-2">
                     {archivos.map((file, index) => (
                       <li
                         key={`${file.name}-${index}`}
                         className="flex items-center gap-3 rounded-md border bg-muted/50 px-4 py-2.5 text-sm min-w-0"
                       >
-                        <FileText className="size-5 shrink-0 text-platform-blue" aria-hidden="true" />
+                        <FileText
+                          className="size-5 shrink-0 text-platform-blue"
+                          aria-hidden="true"
+                        />
                         <span className="flex-1 truncate font-medium text-foreground min-w-0">
                           {file.name}
                         </span>
@@ -358,7 +403,10 @@ export function ReclamoFlow({
                           type="button"
                           onClick={() => handleRemoveFile(index)}
                           className="shrink-0 text-muted-foreground hover:text-destructive transition-colors"
-                          aria-label={t("platform.consultation.claim.removeFile", { file: file.name })}
+                          aria-label={t(
+                            "platform.consultation.claim.removeFile",
+                            { file: file.name },
+                          )}
                         >
                           <X className="size-4" />
                         </button>
@@ -368,7 +416,9 @@ export function ReclamoFlow({
                 )}
 
                 <FieldDescription>
-                  {t("platform.consultation.claim.formatsHelp", { max: MAX_FILE_SIZE_MB })}
+                  {t("platform.consultation.claim.formatsHelp", {
+                    max: MAX_FILE_SIZE_MB,
+                  })}
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -404,7 +454,10 @@ export function ReclamoFlow({
           <>
             <DialogHeader className="gap-4 pt-4 sm:items-center sm:text-center">
               <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-green-100">
-                <CheckCircle2 className="size-7 text-green-600" aria-hidden="true" />
+                <CheckCircle2
+                  className="size-7 text-green-600"
+                  aria-hidden="true"
+                />
               </div>
               <div>
                 <DialogTitle className="text-lg font-bold text-green-800">
@@ -424,16 +477,24 @@ export function ReclamoFlow({
                 {expediente}
               </p>
               <p className="mt-2 text-xs text-muted-foreground">
-                {t("platform.consultation.claim.ticket")} <span className="font-semibold">{papeletaNro}</span>
+                {t("platform.consultation.claim.ticket")}{" "}
+                <span className="font-semibold">{papeletaNro}</span>
               </p>
             </div>
 
             <div className="flex items-start gap-3 rounded-lg bg-blue-50 px-4 py-3.5">
-              <FileText className="mt-0.5 size-5 shrink-0 text-platform-blue" aria-hidden="true" />
+              <FileText
+                className="mt-0.5 size-5 shrink-0 text-platform-blue"
+                aria-hidden="true"
+              />
               <div className="text-sm text-blue-800 text-balance">
-                <p className="font-medium">{t("platform.consultation.claim.nextTitle")}</p>
+                <p className="font-medium">
+                  {t("platform.consultation.claim.nextTitle")}
+                </p>
                 <p className="mt-1 leading-relaxed">
-                  {t("platform.consultation.claim.nextDescription", { section: t("platform.consultation.trackingTitle") })}
+                  {t("platform.consultation.claim.nextDescription", {
+                    section: t("platform.consultation.trackingTitle"),
+                  })}
                 </p>
               </div>
             </div>

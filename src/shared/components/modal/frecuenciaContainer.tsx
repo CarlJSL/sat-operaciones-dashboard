@@ -139,7 +139,7 @@ export function CustomRecurrencePicker({
       nextState.frecuencia = "semana";
 
       // Mapear códigos de día (ej: "DIA001") → iniciales del toggle (ej: "L")
-      const iniciales = initialValue.diaCodigos.reduce<string[]>((acc, codigo) => {
+      const iniciales = initialValue.diaCodigos.reduce<string[]>((acc: string[], codigo: string) => {
         const found = diaOptions.find((d) => d.codigo === codigo);
         if (!found?.nombre) return acc;
 

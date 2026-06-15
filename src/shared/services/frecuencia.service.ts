@@ -1,6 +1,5 @@
 import { api } from "@/core/lib/api";
 import { HttpBase } from "@/core/lib/http-base";
-import type { FormularioLoad } from "@/domain/models";
 import type { Frecuencia } from "@/domain/models/frecuencia";
 
 class FrecuenciaService extends HttpBase<Frecuencia> {
@@ -8,9 +7,9 @@ class FrecuenciaService extends HttpBase<Frecuencia> {
     super("/frecuencia");
   }
 
-  load(id: string | number): Promise<FormularioLoad> {
+  load(id: string | number): Promise<any> {
     return api
-      .get<FormularioLoad>(`${this.baseUrl}/load/${id}`)
+      .get<any>(`${this.baseUrl}/load/${id}`)
       .then((r) => r.data);
   }
 

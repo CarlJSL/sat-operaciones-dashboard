@@ -39,3 +39,4 @@ openspec/
 
 # Skill registry (generado)
 .atl/
+.vercel
