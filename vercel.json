@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://13.140.161.186:9030/sat-web-api/api/:path*"
+    }
+  ]
+}
